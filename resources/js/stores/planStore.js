@@ -47,6 +47,11 @@ export const usePlanStore = defineStore('plan', {
       }
     },
 
+    // Set current plan from cache (for instant display)
+    setCurrentPlan(plan) {
+      this.currentPlan = plan;
+    },
+
     async fetchPlanBySlug(slug) {
       this.loading = true;
       this.error = null;
@@ -54,7 +59,13 @@ export const usePlanStore = defineStore('plan', {
         const response = await axios.get(`/api/plans/slug/${slug}`);
         this.currentPlan = response.data.data;
       } catch (error) {
-        this.error = 'プランの取得に失敗しました';
+        if (error.response?.status === 403) {
+          this.error = error.response.data.message || 'この計画は非公開です。';
+        } else if (error.response?.status === 404) {
+          this.error = '指定されたプランが見つかりませんでした。';
+        } else {
+          this.error = 'プランの取得に失敗しました';
+        }
         console.error(error);
       } finally {
         this.loading = false;

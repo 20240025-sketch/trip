@@ -32,11 +32,22 @@ class PdfService
             'checklistItems' => $plan->checklistItems->groupBy('category'),
         ];
 
-        // Generate PDF
+        // Generate PDF with DomPDF
         $pdf = Pdf::loadView('pdf.plan', $data);
         
-        // Configure PDF
+        // Configure PDF with Japanese font support
         $pdf->setPaper('a4', 'portrait');
+        
+        // Get the Dompdf instance and configure it
+        $dompdf = $pdf->getDomPDF();
+        $options = $dompdf->getOptions();
+        
+        // Set font directories
+        $options->setFontDir(storage_path('fonts'));
+        $options->setFontCache(storage_path('fonts'));
+        $options->setIsHtml5ParserEnabled(true);
+        $options->setIsRemoteEnabled(false);
+        $options->setDefaultFont('ipaexg');
         
         return $pdf;
     }
@@ -82,6 +93,7 @@ class PdfService
         $filename = preg_replace('/[^a-zA-Z0-9\-_\s]/', '', $filename);
         $filename = preg_replace('/\s+/', '_', $filename);
         
-        return $filename;
+        return $filename ?: 'plan';
     }
 }
+

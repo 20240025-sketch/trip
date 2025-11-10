@@ -3,8 +3,18 @@
     <div class="text-gray-500">読み込み中...</div>
   </div>
 
-  <div v-else-if="planStore.error" class="text-center py-12">
-    <div class="text-red-600">{{ planStore.error }}</div>
+  <div v-else-if="planStore.error" class="max-w-2xl mx-auto">
+    <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+      <div class="text-6xl mb-4">🔒</div>
+      <h2 class="text-2xl font-bold text-red-800 mb-2">アクセスできません</h2>
+      <p class="text-red-600 mb-6">{{ planStore.error }}</p>
+      <router-link 
+        to="/" 
+        class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        ホームに戻る
+      </router-link>
+    </div>
   </div>
 
   <div v-else-if="plan" class="max-w-6xl mx-auto">
