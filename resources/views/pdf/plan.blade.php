@@ -103,10 +103,25 @@
         <div class="section-title">チェックリスト</div>
         @foreach($checklistItems as $category => $items)
             <div style="margin: 10px 0;">
-                <strong>{{ $category }}</strong>
+                <div style="font-weight: bold; margin-bottom: 5px;">{{ $category }}</div>
+                @php
+                    $hasNonEmptyItems = false;
+                @endphp
                 @foreach($items as $item)
-                <div>[ ] {{ $item->item_name }}</div>
+                    @if(!empty(trim($item->item_name ?? '')))
+                        @php $hasNonEmptyItems = true; @endphp
+                        <div style="margin-left: 10px; margin-bottom: 3px;">
+                            @if($item->is_checked)
+                                [✓] {{ $item->item_name }}
+                            @else
+                                [ ] {{ $item->item_name }}
+                            @endif
+                        </div>
+                    @endif
                 @endforeach
+                @if(!$hasNonEmptyItems)
+                    <div style="margin-left: 10px; color: #999; font-style: italic;">項目が入力されていません</div>
+                @endif
             </div>
         @endforeach
     </div>

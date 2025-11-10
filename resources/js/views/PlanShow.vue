@@ -185,13 +185,13 @@
             <label 
               v-for="item in items" 
               :key="item.id"
-              class="flex items-center gap-2 cursor-pointer"
+              class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
             >
               <input 
                 type="checkbox" 
                 :checked="item.is_checked"
-                class="w-5 h-5 text-blue-600"
-                disabled
+                @change="toggleChecklistItem(item.id)"
+                class="w-5 h-5 text-blue-600 cursor-pointer"
               >
               <span :class="{ 'line-through text-gray-400': item.is_checked }">
                 {{ item.item }}
@@ -322,6 +322,18 @@ const handleDelete = async () => {
     router.push('/plans');
   } catch (error) {
     uiStore.showError('プランの削除に失敗しました');
+  }
+};
+
+const toggleChecklistItem = async (itemId) => {
+  try {
+    await axios.put(`/api/checklist-items/${itemId}/toggle`);
+    // Reload the plan to get updated checklist state
+    await planStore.fetchPlan(plan.value.id);
+    uiStore.showSuccess('チェック状態を更新しました');
+  } catch (error) {
+    console.error('Toggle checklist error:', error);
+    uiStore.showError('チェック状態の更新に失敗しました');
   }
 };
 
