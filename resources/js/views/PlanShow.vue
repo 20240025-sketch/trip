@@ -22,6 +22,7 @@
           </div>
           <div class="flex gap-3">
             <router-link 
+              v-if="canEdit"
               :to="`/plans/${plan.id}/edit`" 
               class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
@@ -34,6 +35,7 @@
               📄 PDF
             </button>
             <button 
+              v-if="canEdit"
               @click="handleDelete"
               class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
@@ -230,14 +232,22 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePlanStore } from '@/stores/planStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useUiStore } from '@/stores/uiStore';
 
 const route = useRoute();
 const router = useRouter();
 const planStore = usePlanStore();
+const authStore = useAuthStore();
 const uiStore = useUiStore();
 
 const plan = computed(() => planStore.currentPlan);
+
+const canEdit = computed(() => {
+  if (!authStore.isAuthenticated || !plan.value) return false;
+  // Admin can edit any plan, user can only edit their own
+  return authStore.isAdmin || plan.value.user_id === authStore.user?.id;
+});
 
 const publicUrl = computed(() => {
   if (!plan.value?.slug) return '';

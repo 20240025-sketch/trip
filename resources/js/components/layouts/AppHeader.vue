@@ -30,13 +30,51 @@
             <span class="text-xl">📋</span>
             <span>プラン一覧</span>
           </router-link>
-          <router-link 
-            to="/plans/create" 
-            class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-full hover:from-pink-600 hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
-          >
-            <span class="text-xl">✨</span>
-            <span>新しい旅を計画</span>
-          </router-link>
+          
+          <template v-if="authStore.isAuthenticated">
+            <router-link 
+              to="/plans/create" 
+              class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-full hover:from-pink-600 hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+            >
+              <span class="text-xl">✨</span>
+              <span>新しい旅を計画</span>
+            </router-link>
+            
+            <div class="flex items-center gap-3 ml-2">
+              <div class="px-4 py-2 bg-white rounded-full shadow-sm border border-purple-200">
+                <span class="text-sm text-gray-600">👤</span>
+                <span class="ml-2 font-semibold text-gray-800">{{ authStore.user?.name }}</span>
+                <span v-if="authStore.isAdmin" class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                  管理者
+                </span>
+              </div>
+              
+              <button
+                @click="handleLogout"
+                class="px-5 py-2.5 text-gray-700 hover:text-red-600 font-semibold rounded-full hover:bg-red-100 transition-all duration-300 flex items-center gap-2"
+              >
+                <span class="text-xl">🚪</span>
+                <span>ログアウト</span>
+              </button>
+            </div>
+          </template>
+          
+          <template v-else>
+            <router-link 
+              to="/login" 
+              class="px-5 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-100 transition-all duration-300 flex items-center gap-2"
+            >
+              <span class="text-xl">🔑</span>
+              <span>ログイン</span>
+            </router-link>
+            <router-link 
+              to="/register" 
+              class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-full hover:from-pink-600 hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+            >
+              <span class="text-xl">✨</span>
+              <span>新規登録</span>
+            </router-link>
+          </template>
         </div>
       </div>
     </nav>
@@ -44,4 +82,21 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import { useUiStore } from '@/stores/uiStore';
+
+const router = useRouter();
+const authStore = useAuthStore();
+const uiStore = useUiStore();
+
+const handleLogout = async () => {
+  try {
+    await authStore.logout();
+    uiStore.showSuccess('ログアウトしました');
+    router.push('/');
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
 </script>

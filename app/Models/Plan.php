@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 class Plan extends Model
 {
     protected $fillable = [
+        'user_id',
         'title',
         'description',
         'start_date',
@@ -55,5 +57,10 @@ class Plan extends Model
     public function images(): MorphMany
     {
         return $this->morphMany(Image::class, 'imageable')->orderBy('order');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -19,6 +19,17 @@ class PlanController extends Controller
     {
         $query = Plan::query();
 
+        // If authenticated, show user's own plans and public plans
+        // If not authenticated, show only public plans
+        if ($request->user()) {
+            $query->where(function ($q) use ($request) {
+                $q->where('user_id', $request->user()->id)
+                  ->orWhere('is_public', true);
+            });
+        } else {
+            $query->where('is_public', true);
+        }
+
         // Search by title or description
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -55,7 +66,10 @@ class PlanController extends Controller
      */
     public function store(StorePlanRequest $request): JsonResponse
     {
-        $plan = Plan::create($request->validated());
+        $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
+        
+        $plan = Plan::create($validated);
 
         // Create days based on date range
         $startDate = $plan->start_date;
@@ -130,6 +144,14 @@ class PlanController extends Controller
     public function update(UpdatePlanRequest $request, string $id): JsonResponse
     {
         $plan = Plan::findOrFail($id);
+        
+        // Check if user owns the plan or is admin
+        if ($plan->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+            return response()->json([
+                'message' => 'この計画を編集する権限がありません。'
+            ], 403);
+        }
+        
         $plan->update($request->validated());
 
         // If dates changed, update days
@@ -165,9 +187,17 @@ class PlanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $plan = Plan::findOrFail($id);
+        
+        // Check if user owns the plan or is admin
+        if ($plan->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+            return response()->json([
+                'message' => 'この計画を削除する権限がありません。'
+            ], 403);
+        }
+        
         $plan->delete();
 
         return response()->json([
