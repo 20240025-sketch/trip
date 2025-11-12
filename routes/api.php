@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\DayController;
 use App\Http\Controllers\Api\ImageController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\PdfController;
@@ -76,3 +77,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('questions/{question}/answers', [QuestionController::class, 'storeAnswer']);
 });
 
+// Notifications - public read, admin write
+Route::get('notifications', [NotificationController::class, 'index']);
+Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('notifications', [NotificationController::class, 'store']); // Admin only
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy']); // Admin only
+});

@@ -65,17 +65,21 @@ class User extends Authenticatable
 
     /**
      * Check if user is admin
+     * Admin: email does NOT start with a digit (e.g., thjthj@seiei.ac.jp)
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        // If email starts with a digit, it's a regular user, not admin
+        return preg_match('/^\d/', $this->email) === 0;
     }
 
     /**
-     * Check if user is a regular user (email starts with a digit)
+     * Check if user is a regular user
+     * Regular user: email starts with a digit (e.g., 29202920@seiei.ac.jp)
      */
     public function isRegularUser(): bool
     {
+        // Regular users have emails starting with a digit
         return preg_match('/^\d/', $this->email) === 1;
     }
 
@@ -85,12 +89,13 @@ class User extends Authenticatable
      */
     public function getTeamId(): ?string
     {
+        // Only regular users (email starts with digit) have teams
         if (!$this->isRegularUser()) {
             return null;
         }
         
         // Extract digits from the beginning of email
-        // Example: 20240025@example.com -> 20240025
+        // Example: 29202920@seiei.ac.jp -> 29202920
         preg_match('/^(\d+)/', $this->email, $matches);
         return $matches[1] ?? null;
     }
