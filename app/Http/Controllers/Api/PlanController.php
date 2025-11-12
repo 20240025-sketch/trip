@@ -17,16 +17,43 @@ class PlanController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Plan::query();
+        $query = Plan::with('user');
+        $user = $request->user();
 
-        // If authenticated, show user's own plans and public plans
-        // If not authenticated, show only public plans
-        if ($request->user()) {
-            $query->where(function ($q) use ($request) {
-                $q->where('user_id', $request->user()->id)
-                  ->orWhere('is_public', true);
-            });
+        if ($user) {
+            if ($user->isAdmin()) {
+                // Admins can see all plans
+                // No filtering needed
+            } elseif ($user->isRegularUser()) {
+                // Regular users can see:
+                // 1. Their own plans
+                // 2. Plans from same team
+                // 3. Public plans from other teams
+                $teamId = $user->getTeamId();
+                
+                $query->where(function ($q) use ($user, $teamId) {
+                    // Own plans
+                    $q->where('user_id', $user->id);
+                    
+                    // Same team plans
+                    if ($teamId) {
+                        $q->orWhereHas('user', function ($userQuery) use ($teamId) {
+                            $userQuery->where('email', 'like', $teamId . '%');
+                        });
+                    }
+                    
+                    // Public plans
+                    $q->orWhere('is_public', true);
+                });
+            } else {
+                // Other authenticated users (no team)
+                $query->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('is_public', true);
+                });
+            }
         } else {
+            // Not authenticated - only public plans
             $query->where('is_public', true);
         }
 
@@ -98,14 +125,22 @@ class PlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
         $plan = Plan::with([
             'days.scheduleItems.images',
             'participants',
             'checklistItems',
-            'images'
+            'images',
+            'user'
         ])->findOrFail($id);
+
+        // Check if user can view this plan
+        if (!$plan->canView($request->user())) {
+            return response()->json([
+                'message' => 'この計画を閲覧する権限がありません。'
+            ], 403);
+        }
 
         return response()->json([
             'data' => new PlanResource($plan)
@@ -115,21 +150,22 @@ class PlanController extends Controller
     /**
      * Display the specified resource by slug.
      */
-    public function showBySlug(string $slug): JsonResponse
+    public function showBySlug(Request $request, string $slug): JsonResponse
     {
         $plan = Plan::where('slug', $slug)
             ->with([
                 'days.scheduleItems.images',
                 'participants',
                 'checklistItems',
-                'images'
+                'images',
+                'user'
             ])
             ->firstOrFail();
 
-        // Only show public plans by slug
-        if (!$plan->is_public) {
+        // Check if user can view this plan
+        if (!$plan->canView($request->user())) {
             return response()->json([
-                'message' => 'この計画は非公開です。'
+                'message' => 'この計画を閲覧する権限がありません。'
             ], 403);
         }
 
@@ -143,10 +179,10 @@ class PlanController extends Controller
      */
     public function update(UpdatePlanRequest $request, string $id): JsonResponse
     {
-        $plan = Plan::findOrFail($id);
+        $plan = Plan::with('user')->findOrFail($id);
         
-        // Check if user owns the plan or is admin
-        if ($plan->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        // Check if user can edit this plan
+        if (!$plan->canEdit($request->user())) {
             return response()->json([
                 'message' => 'この計画を編集する権限がありません。'
             ], 403);
@@ -189,10 +225,10 @@ class PlanController extends Controller
      */
     public function destroy(Request $request, string $id): JsonResponse
     {
-        $plan = Plan::findOrFail($id);
+        $plan = Plan::with('user')->findOrFail($id);
         
-        // Check if user owns the plan or is admin
-        if ($plan->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        // Check if user can delete this plan
+        if (!$plan->canDelete($request->user())) {
             return response()->json([
                 'message' => 'この計画を削除する権限がありません。'
             ], 403);

@@ -244,9 +244,9 @@ const uiStore = useUiStore();
 const plan = computed(() => planStore.currentPlan);
 
 const canEdit = computed(() => {
-  if (!authStore.isAuthenticated || !plan.value) return false;
-  // Admin can edit any plan, user can only edit their own
-  return authStore.isAdmin || plan.value.user_id === authStore.user?.id;
+  if (!plan.value) return false;
+  // Use the can_edit flag from the API response
+  return plan.value.can_edit === true;
 });
 
 const publicUrl = computed(() => {

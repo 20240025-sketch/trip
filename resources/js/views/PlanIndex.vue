@@ -109,6 +109,7 @@
                     詳細を見る
                   </router-link>
                   <router-link 
+                    v-if="plan.can_edit"
                     :to="`/plans/${plan.id}/edit`"
                     @click="handlePlanClick(plan)"
                     class="px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-full hover:bg-gray-200 hover:scale-105 transition-all duration-300"

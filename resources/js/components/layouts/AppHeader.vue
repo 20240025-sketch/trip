@@ -24,6 +24,13 @@
             <span>ホーム</span>
           </router-link>
           <router-link 
+            to="/qa" 
+            class="px-5 py-2.5 text-gray-700 hover:text-green-600 font-semibold rounded-full hover:bg-green-100 transition-all duration-300 flex items-center gap-2"
+          >
+            <span class="text-xl">💬</span>
+            <span>Q&A</span>
+          </router-link>
+          <router-link 
             to="/plans" 
             class="px-5 py-2.5 text-gray-700 hover:text-purple-600 font-semibold rounded-full hover:bg-purple-100 transition-all duration-300 flex items-center gap-2"
           >

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\PdfController;
 use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\ScheduleItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -61,4 +62,13 @@ Route::get('plans/slug/{slug}', [PlanController::class, 'showBySlug']);
 // PDF - public access
 Route::get('plans/{plan}/pdf', [PdfController::class, 'generate']);
 Route::get('plans/{plan}/pdf/preview', [PdfController::class, 'preview']);
+
+// Q&A - public read, authenticated write
+Route::get('questions', [QuestionController::class, 'index']);
+Route::get('questions/{question}', [QuestionController::class, 'show']);
+Route::post('questions', [QuestionController::class, 'store']); // Can post without auth but with auth gets user info
+Route::middleware('auth:sanctum')->group(function () {
+    Route::delete('questions/{question}', [QuestionController::class, 'destroy']);
+    Route::post('questions/{question}/answers', [QuestionController::class, 'storeAnswer']);
+});
 

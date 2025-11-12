@@ -20,6 +20,11 @@ const routes = [
     meta: { guest: true },
   },
   {
+    path: '/qa',
+    name: 'qa',
+    component: () => import('@/pages/QuestionsPage.vue'),
+  },
+  {
     path: '/plans',
     name: 'plans',
     component: () => import('@/views/PlanIndex.vue'),

@@ -321,13 +321,13 @@
                     $hasNonEmptyItems = false;
                 @endphp
                 @foreach($items as $item)
-                    @if(!empty(trim($item->item_name ?? '')))
+                    @if(!empty(trim($item->item ?? '')))
                         @php $hasNonEmptyItems = true; @endphp
                         <div class="checklist-item">
                             <span class="checkbox @if($item->is_checked) checked @endif">
                                 @if($item->is_checked)✓@endif
                             </span>
-                            {{ $item->item_name }}
+                            {{ $item->item }}
                         </div>
                     @endif
                 @endforeach

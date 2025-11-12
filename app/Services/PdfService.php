@@ -45,7 +45,6 @@ class PdfService
         // Set font directories
         $options->setFontDir(storage_path('fonts'));
         $options->setFontCache(storage_path('fonts'));
-        $options->setIsHtml5ParserEnabled(true);
         $options->setIsRemoteEnabled(false);
         $options->setDefaultFont('ipaexg');
         

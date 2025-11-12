@@ -36,6 +36,13 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['is_admin'];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -49,11 +56,58 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the is_admin attribute.
+     */
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    /**
      * Check if user is admin
      */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is a regular user (email starts with a digit)
+     */
+    public function isRegularUser(): bool
+    {
+        return preg_match('/^\d/', $this->email) === 1;
+    }
+
+    /**
+     * Get the team identifier from email
+     * For users whose email starts with a digit, extract the team number
+     */
+    public function getTeamId(): ?string
+    {
+        if (!$this->isRegularUser()) {
+            return null;
+        }
+        
+        // Extract digits from the beginning of email
+        // Example: 20240025@example.com -> 20240025
+        preg_match('/^(\d+)/', $this->email, $matches);
+        return $matches[1] ?? null;
+    }
+
+    /**
+     * Check if user belongs to the same team as another user
+     */
+    public function isSameTeam(User $otherUser): bool
+    {
+        $myTeam = $this->getTeamId();
+        $otherTeam = $otherUser->getTeamId();
+        
+        if ($myTeam === null || $otherTeam === null) {
+            return false;
+        }
+        
+        return $myTeam === $otherTeam;
     }
 
     /**

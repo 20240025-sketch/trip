@@ -14,8 +14,11 @@ class PlanResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $user = $request->user();
+        
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
             'title' => $this->title,
             'description' => $this->description,
             'start_date' => $this->start_date?->format('Y-m-d'),
@@ -30,6 +33,11 @@ class PlanResource extends JsonResource
             'images' => ImageResource::collection($this->whenLoaded('images')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            
+            // Add permission flags for frontend
+            'can_view' => $this->canView($user),
+            'can_edit' => $this->canEdit($user),
+            'can_delete' => $this->canDelete($user),
         ];
     }
 }
