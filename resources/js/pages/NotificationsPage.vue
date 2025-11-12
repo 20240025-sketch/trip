@@ -88,7 +88,7 @@
           <span v-if="!notification.is_read" class="unread-badge">未読</span>
           <span class="notification-date">{{ formatDate(notification.created_at) }}</span>
           <button
-            v-if="isAdmin"
+            v-if="authStore.user?.id === notification.user_id"
             @click.stop="deleteNotification(notification.id)"
             class="btn-delete"
             title="削除"

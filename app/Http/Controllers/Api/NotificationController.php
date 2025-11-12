@@ -22,6 +22,7 @@ class NotificationController extends Controller
             ->map(function ($notification) use ($user) {
                 return [
                     'id' => $notification->id,
+                    'user_id' => $notification->user_id,
                     'title' => $notification->title,
                     'content' => $notification->content,
                     'type' => $notification->type,
@@ -134,14 +135,15 @@ class NotificationController extends Controller
      */
     public function destroy(Request $request, string $id): JsonResponse
     {
-        // Only admins can delete notifications
-        if (!$request->user() || !$request->user()->isAdmin()) {
+        $notification = Notification::findOrFail($id);
+        
+        // Only the author can delete their notification
+        if (!$request->user() || $notification->user_id !== $request->user()->id) {
             return response()->json([
-                'message' => 'お知らせを削除する権限がありません。'
+                'message' => 'お知らせを削除する権限がありません。投稿者のみが削除できます。'
             ], 403);
         }
 
-        $notification = Notification::findOrFail($id);
         $notification->delete();
 
         return response()->json([
