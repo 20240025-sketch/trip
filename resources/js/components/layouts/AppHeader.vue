@@ -47,7 +47,8 @@
               <span>新しい旅を計画</span>
             </router-link>
             
-            <div class="flex items-center gap-3 ml-2">
+            <div class="flex items-center gap-2 ml-2">
+              <!-- User Info -->
               <div class="px-4 py-2 bg-white rounded-full shadow-sm border border-purple-200">
                 <span class="text-sm text-gray-600">👤</span>
                 <span class="ml-2 font-semibold text-gray-800">{{ authStore.user?.name }}</span>
@@ -56,13 +57,40 @@
                 </span>
               </div>
               
-              <button
-                @click="handleLogout"
-                class="px-5 py-2.5 text-gray-700 hover:text-red-600 font-semibold rounded-full hover:bg-red-100 transition-all duration-300 flex items-center gap-2"
-              >
-                <span class="text-xl">🚪</span>
-                <span>ログアウト</span>
-              </button>
+              <!-- Dropdown Menu -->
+              <div class="relative" ref="dropdownContainer">
+                <button
+                  @click="toggleDropdown"
+                  class="px-4 py-2 text-gray-700 hover:text-purple-600 font-semibold rounded-full hover:bg-purple-100 transition-all duration-300 flex items-center gap-1"
+                >
+                  <span class="text-xl">⚙️</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <!-- Dropdown Content -->
+                <div
+                  v-show="showDropdown"
+                  class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border-2 border-purple-100 overflow-hidden z-50"
+                >
+                  <router-link
+                    to="/change-password"
+                    @click="closeDropdown"
+                    class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200"
+                  >
+                    <span class="text-xl">🔐</span>
+                    <span class="font-semibold">パスワード変更</span>
+                  </router-link>
+                  <button
+                    @click="handleLogout"
+                    class="w-full flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 border-t border-gray-100"
+                  >
+                    <span class="text-xl">🚪</span>
+                    <span class="font-semibold">ログアウト</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </template>
           
@@ -89,6 +117,7 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -96,8 +125,25 @@ import { useUiStore } from '@/stores/uiStore';
 const router = useRouter();
 const authStore = useAuthStore();
 const uiStore = useUiStore();
+const showDropdown = ref(false);
+const dropdownContainer = ref(null);
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
+
+const closeDropdown = () => {
+  showDropdown.value = false;
+};
+
+const handleClickOutside = (event) => {
+  if (dropdownContainer.value && !dropdownContainer.value.contains(event.target)) {
+    closeDropdown();
+  }
+};
 
 const handleLogout = async () => {
+  closeDropdown();
   try {
     await authStore.logout();
     uiStore.showSuccess('ログアウトしました');
@@ -106,4 +152,12 @@ const handleLogout = async () => {
     console.error('Logout error:', error);
   }
 };
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>

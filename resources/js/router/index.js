@@ -20,6 +20,12 @@ const routes = [
     meta: { guest: true },
   },
   {
+    path: '/change-password',
+    name: 'changePassword',
+    component: () => import('@/views/ChangePassword.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/qa',
     name: 'qa',
     component: () => import('@/pages/QuestionsPage.vue'),

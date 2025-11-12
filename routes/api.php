@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\DayController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\ParticipantController;
+use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\PdfController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\QuestionController;
@@ -20,6 +21,9 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
+    
+    // Password change
+    Route::put('password', [PasswordController::class, 'update']);
     
     // Plans - store, update, delete require auth
     Route::post('plans', [PlanController::class, 'store']);
