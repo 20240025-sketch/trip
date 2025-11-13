@@ -31,6 +31,11 @@ const routes = [
     component: () => import('@/pages/QuestionsPage.vue'),
   },
   {
+    path: '/attachments',
+    name: 'attachments',
+    component: () => import('@/pages/AttachmentsPage.vue'),
+  },
+  {
     path: '/notifications',
     name: 'notifications',
     component: () => import('@/pages/NotificationsPage.vue'),

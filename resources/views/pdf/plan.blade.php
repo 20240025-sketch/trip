@@ -346,5 +346,42 @@
         <div class="memo-box">{{ $plan->memo }}</div>
     </div>
     @endif
+
+    <!-- 添付ファイル一覧 -->
+    @if(isset($attachments) && count($attachments) > 0)
+    <div class="section">
+        <div class="section-title">添付ファイル</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 50%; text-align: left;">ファイル名</th>
+                    <th style="width: 20%; text-align: center;">種類</th>
+                    <th style="width: 15%; text-align: right;">サイズ</th>
+                    <th style="width: 15%; text-align: center;">追加日</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($attachments as $attachment)
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>{{ $attachment->original_name }}</strong>
+                    </td>
+                    <td style="text-align: center;">
+                        @if($attachment->isImage())
+                            📷 画像
+                        @elseif($attachment->isPdf())
+                            📄 PDF
+                        @else
+                            📎 {{ strtoupper($attachment->getExtension()) }}
+                        @endif
+                    </td>
+                    <td style="text-align: right;">{{ $attachment->getFormattedSize() }}</td>
+                    <td style="text-align: center;">{{ $attachment->created_at->format('Y/m/d') }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
 </body>
 </html>

@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="min-h-screen bg-gray-50">
+  <div id="app" class="min-h-screen" style="background: linear-gradient(135deg, #e0f7ff 0%, #ffffff 50%, #e0f7ff 100%);">
     <AppHeader />
     <main class="container mx-auto px-4 py-8">
       <RouterView />
@@ -13,12 +13,12 @@
     >
       <div 
         :class="[
-          'px-6 py-4 rounded-lg shadow-lg',
+          'px-6 py-4 rounded-2xl shadow-lg border-2',
           {
-            'bg-green-500 text-white': uiStore.alert.type === 'success',
-            'bg-red-500 text-white': uiStore.alert.type === 'error',
-            'bg-yellow-500 text-white': uiStore.alert.type === 'warning',
-            'bg-blue-500 text-white': uiStore.alert.type === 'info',
+            'bg-cyan-50 text-cyan-800 border-cyan-300': uiStore.alert.type === 'success',
+            'bg-red-50 text-red-800 border-red-300': uiStore.alert.type === 'error',
+            'bg-yellow-50 text-yellow-800 border-yellow-300': uiStore.alert.type === 'warning',
+            'bg-blue-50 text-blue-800 border-blue-300': uiStore.alert.type === 'info',
           }
         ]"
       >
@@ -26,10 +26,10 @@
           <span class="text-2xl">
             {{ uiStore.alert.type === 'success' ? '✓' : uiStore.alert.type === 'error' ? '✕' : 'ℹ' }}
           </span>
-          <p class="flex-1">{{ uiStore.alert.message }}</p>
+          <p class="flex-1 font-semibold">{{ uiStore.alert.message }}</p>
           <button 
             @click="uiStore.hideAlert()"
-            class="text-white hover:text-gray-200"
+            class="hover:opacity-70 transition-opacity"
           >
             ✕
           </button>

@@ -59,6 +59,11 @@ class Plan extends Model
         return $this->morphMany(Image::class, 'imageable')->orderBy('order');
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(PlanAttachment::class)->orderBy('order');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

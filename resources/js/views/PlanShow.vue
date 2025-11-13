@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
+  <div class="min-h-screen py-8">
     <div v-if="planStore.loading && !plan" class="text-center py-20">
-      <div class="inline-block animate-spin rounded-full h-20 w-20 border-4 border-purple-500 border-t-transparent mb-4"></div>
+      <div class="inline-block animate-spin rounded-full h-20 w-20 border-4 border-cyan-400 border-t-transparent mb-4"></div>
       <p class="text-gray-500 text-xl">読み込み中...</p>
     </div>
 
@@ -12,10 +12,10 @@
 
     <div v-else-if="plan" class="max-w-6xl mx-auto px-4">
       <!-- Header -->
-      <div class="bg-gradient-to-br from-white via-pink-50 to-purple-50 rounded-3xl shadow-2xl p-8 mb-8 border-2 border-pink-100">
+      <div class="bg-gradient-to-br from-white via-cyan-50 to-blue-50 rounded-3xl shadow-2xl p-8 mb-8 border-2 border-cyan-200">
         <div class="flex justify-between items-start mb-6">
           <div class="flex-1">
-            <h1 class="text-5xl font-black mb-4 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 class="text-5xl font-black mb-4 bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
               {{ plan.title }} ✨
             </h1>
             <p class="text-gray-700 text-lg leading-relaxed">{{ plan.description }}</p>
@@ -24,20 +24,20 @@
             <router-link 
               v-if="canEdit"
               :to="`/plans/${plan.id}/edit`" 
-              class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
+              class="px-6 py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               ✏️ 編集
             </router-link>
             <button 
               @click="downloadPdf"
-              class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
+              class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               📄 PDF
             </button>
             <button 
               v-if="canEdit"
               @click="handleDelete"
-              class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
+              class="px-6 py-3 bg-gradient-to-r from-red-400 to-pink-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               🗑️ 削除
             </button>
@@ -224,6 +224,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Attachments -->
+    <div class="mt-8 bg-white rounded-2xl shadow-xl p-8 border-2 border-cyan-100">
+      <AttachmentManager
+        :plan-id="plan.id"
+        :can-edit="canEdit"
+      />
+    </div>
     </div>
   </div>
 </template>
@@ -234,6 +242,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useUiStore } from '@/stores/uiStore';
+import AttachmentManager from '@/components/AttachmentManager.vue';
 
 const route = useRoute();
 const router = useRouter();

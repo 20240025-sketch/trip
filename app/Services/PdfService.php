@@ -21,7 +21,8 @@ class PdfService
             'days.scheduleItems.images',
             'participants',
             'checklistItems',
-            'images'
+            'images',
+            'attachments'
         ]);
 
         // Prepare data for the view
@@ -30,6 +31,7 @@ class PdfService
             'days' => $plan->days,
             'participants' => $plan->participants,
             'checklistItems' => $plan->checklistItems->groupBy('category'),
+            'attachments' => $plan->attachments,
         ];
 
         // Generate PDF with DomPDF

@@ -253,21 +253,23 @@ onUnmounted(() => {
 .page-title {
   font-size: 2rem;
   margin-bottom: 30px;
-  color: #333;
+  color: #0891b2;
+  text-shadow: 0 2px 4px rgba(8, 145, 178, 0.1);
 }
 
 .question-form-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.1);
   margin-bottom: 30px;
+  border: 2px solid #a5f3fc;
 }
 
 .question-form-card h2 {
   font-size: 1.3rem;
   margin-bottom: 20px;
-  color: #333;
+  color: #0891b2;
 }
 
 .form-group {
@@ -277,24 +279,27 @@ onUnmounted(() => {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: #0e7490;
 }
 
 .form-group textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 2px solid #a5f3fc;
+  border-radius: 12px;
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
-  transition: border-color 0.3s;
+  transition: all 0.3s;
+  background: #ecfeff;
 }
 
 .form-group textarea:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #06b6d4;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 }
 
 .checkbox-group label {
@@ -303,30 +308,36 @@ onUnmounted(() => {
   gap: 8px;
   font-weight: normal;
   cursor: pointer;
+  color: #0e7490;
 }
 
 .checkbox-group input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
+  accent-color: #06b6d4;
 }
 
 .btn {
   padding: 10px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
+  font-weight: 600;
 }
 
 .btn-primary {
-  background: #4CAF50;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #45a049;
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+  transform: translateY(-2px);
 }
 
 .btn-primary:disabled {
@@ -347,16 +358,26 @@ onUnmounted(() => {
 .no-questions {
   text-align: center;
   padding: 40px;
-  color: #999;
+  color: #67e8f9;
   font-size: 1.1rem;
+  background: white;
+  border-radius: 16px;
+  border: 2px dashed #a5f3fc;
 }
 
 .question-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.1);
   margin-bottom: 20px;
+  border: 2px solid #a5f3fc;
+  transition: all 0.3s;
+}
+
+.question-card:hover {
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.2);
+  transform: translateY(-2px);
 }
 
 .question-header {
@@ -371,24 +392,24 @@ onUnmounted(() => {
   display: flex;
   gap: 12px;
   font-size: 0.9rem;
-  color: #666;
+  color: #0891b2;
 }
 
 .author {
   font-weight: 600;
-  color: #333;
+  color: #0e7490;
 }
 
 .author.admin {
-  color: #4CAF50;
+  color: #06b6d4;
 }
 
 .date {
-  color: #999;
+  color: #67e8f9;
 }
 
 .btn-delete {
-  background: #f44336;
+  background: linear-gradient(135deg, #f43f5e 0%, #dc2626 100%);
   color: white;
   border: none;
   border-radius: 50%;
@@ -397,17 +418,20 @@ onUnmounted(() => {
   font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
 }
 
 .btn-delete:hover {
-  background: #d32f2f;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
+  transform: scale(1.1);
 }
 
 .question-content {
   font-size: 1.05rem;
   line-height: 1.6;
-  color: #333;
+  color: #164e63;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -415,27 +439,28 @@ onUnmounted(() => {
 .answers-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 2px solid #cffafe;
 }
 
 .answers-section h3 {
   font-size: 1.1rem;
   margin-bottom: 16px;
-  color: #4CAF50;
+  color: #06b6d4;
 }
 
 .answer-card {
-  background: #f9f9f9;
-  border-left: 3px solid #4CAF50;
+  background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+  border-left: 4px solid #06b6d4;
   padding: 16px;
-  border-radius: 6px;
+  border-radius: 12px;
   margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.1);
 }
 
 .answer-content {
   font-size: 1rem;
   line-height: 1.6;
-  color: #333;
+  color: #164e63;
   white-space: pre-wrap;
   word-wrap: break-word;
   margin-top: 8px;
@@ -444,13 +469,13 @@ onUnmounted(() => {
 .answer-form {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 2px solid #cffafe;
 }
 
 .answer-form h3 {
   font-size: 1.1rem;
   margin-bottom: 16px;
-  color: #333;
+  color: #0891b2;
 }
 
 @media (max-width: 768px) {

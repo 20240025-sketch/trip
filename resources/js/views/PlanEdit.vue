@@ -172,6 +172,14 @@
           <p class="text-sm text-gray-400 mt-1">上のエリアから画像をアップロードしてください</p>
         </div>
       </div>
+
+      <!-- Attachments Section -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-cyan-100">
+        <AttachmentManager
+          :plan-id="plan.id"
+          :can-edit="true"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -185,6 +193,7 @@ import { useUiStore } from '@/stores/uiStore';
 import DaySchedule from '@/components/schedule/DaySchedule.vue';
 import ImageUploader from '@/components/image/ImageUploader.vue';
 import ImageGallery from '@/components/image/ImageGallery.vue';
+import AttachmentManager from '@/components/AttachmentManager.vue';
 import axios from 'axios';
 
 const route = useRoute();
