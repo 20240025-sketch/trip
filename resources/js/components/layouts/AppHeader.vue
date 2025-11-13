@@ -15,31 +15,31 @@
         </router-link>
         
         <!-- Navigation -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <router-link 
             to="/" 
-            class="px-5 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2"
+            class="px-4 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
             <span class="text-xl">🏠</span>
             <span>ホーム</span>
           </router-link>
           <router-link 
             to="/attachments" 
-            class="px-5 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2"
+            class="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
             <span class="text-xl">📎</span>
             <span>添付ファイル</span>
           </router-link>
           <router-link 
             to="/qa" 
-            class="px-5 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2"
+            class="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
             <span class="text-xl">💬</span>
             <span>Q&A</span>
           </router-link>
           <router-link 
             to="/notifications" 
-            class="px-5 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 relative"
+            class="px-4 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 relative whitespace-nowrap"
           >
             <span class="text-xl">📢</span>
             <span>お知らせ</span>
@@ -49,7 +49,7 @@
           </router-link>
           <router-link 
             to="/plans" 
-            class="px-5 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2"
+            class="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
             <span class="text-xl">📋</span>
             <span>プラン一覧</span>
@@ -58,7 +58,7 @@
           <template v-if="authStore.isAuthenticated">
             <router-link 
               to="/plans/create" 
-              class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+              class="px-5 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <span class="text-xl">✨</span>
               <span>新しい旅を計画</span>
@@ -121,14 +121,14 @@
           <template v-else>
             <router-link 
               to="/login" 
-              class="px-5 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2"
+              class="px-4 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <span class="text-xl">🔑</span>
               <span>ログイン</span>
             </router-link>
             <router-link 
               to="/register" 
-              class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+              class="px-5 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <span class="text-xl">✨</span>
               <span>新規登録</span>

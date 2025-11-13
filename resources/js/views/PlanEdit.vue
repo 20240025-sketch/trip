@@ -1,185 +1,228 @@
 <template>
-  <div class="max-w-7xl mx-auto">
-    <h1 class="text-3xl font-bold mb-8">プランを編集</h1>
+  <div class="plan-edit-page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">✏️ プランを編集</h1>
+        <div class="header-actions">
+          <router-link 
+            :to="`/plans/${plan?.id}`" 
+            class="btn btn-secondary"
+          >
+            ← プレビュー
+          </router-link>
+        </div>
+      </div>
+    </div>
     
-    <div v-if="planStore.loading && !plan" class="text-center py-12">
-      <div class="text-gray-500">読み込み中...</div>
+    <div v-if="planStore.loading && !plan" class="loading-state">
+      <div class="spinner"></div>
+      <p>読み込み中...</p>
     </div>
 
-    <div v-else-if="plan">
-      <!-- Basic Info Form -->
-      <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-        <h2 class="text-xl font-bold mb-6">基本情報</h2>
-        
-        <form @submit.prevent="handleSubmit">
-          <!-- Title -->
-          <div class="mb-6">
-            <label class="block text-gray-700 font-bold mb-2">タイトル *</label>
-            <input 
-              v-model="form.title" 
-              type="text" 
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-          </div>
+    <div v-else-if="plan" class="content-wrapper">
+      <!-- Section Navigation -->
+      <div class="section-nav">
+        <a href="#basic-info" class="nav-item">📝 基本情報</a>
+        <a href="#schedule" class="nav-item">📅 スケジュール</a>
+        <a href="#images" class="nav-item">📸 画像</a>
+        <a href="#attachments" class="nav-item">📎 添付ファイル</a>
+      </div>
 
-          <!-- Description -->
-          <div class="mb-6">
-            <label class="block text-gray-700 font-bold mb-2">説明</label>
-            <textarea 
-              v-model="form.description" 
-              rows="3"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-
-          <!-- Dates -->
-          <div class="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label class="block text-gray-700 font-bold mb-2">開始日 *</label>
-              <input 
-                v-model="form.start_date" 
-                type="date" 
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-            </div>
-            <div>
-              <label class="block text-gray-700 font-bold mb-2">終了日 *</label>
-              <input 
-                v-model="form.end_date" 
-                type="date" 
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+      <!-- Basic Info Section -->
+      <section id="basic-info" class="content-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📝</div>
+            <div class="section-info">
+              <h2 class="section-title">基本情報</h2>
+              <p class="section-description">旅行の基本的な情報を入力してください</p>
             </div>
           </div>
-
-          <!-- Memo -->
-          <div class="mb-6">
-            <label class="block text-gray-700 font-bold mb-2">メモ</label>
-            <textarea 
-              v-model="form.memo" 
-              rows="4"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-
-          <!-- Public -->
-          <div class="mb-8">
-            <label class="flex items-center">
+          
+          <form @submit.prevent="handleSubmit" class="form-content">
+            <!-- Title -->
+            <div class="form-group">
+              <label class="form-label required">タイトル</label>
               <input 
-                v-model="form.is_public" 
-                type="checkbox"
-                class="w-5 h-5 text-blue-600"
+                v-model="form.title" 
+                type="text" 
+                required
+                class="form-input"
+                placeholder="例: 箱根温泉旅行 1泊2日"
               >
-              <span class="ml-2 text-gray-700">このプランを公開する</span>
-            </label>
-          </div>
+            </div>
 
-          <!-- Error Message -->
-          <div v-if="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p class="text-red-600">{{ error }}</p>
-          </div>
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label">説明</label>
+              <textarea 
+                v-model="form.description" 
+                rows="3"
+                class="form-input"
+                placeholder="旅行の概要や目的を記入してください"
+              ></textarea>
+            </div>
 
-          <!-- Buttons -->
-          <div class="flex gap-4">
-            <button 
-              type="submit" 
-              :disabled="planStore.loading"
-              class="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {{ planStore.loading ? '更新中...' : '基本情報を更新' }}
-            </button>
-            <router-link 
-              :to="`/plans/${plan.id}`" 
-              class="px-8 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300"
-            >
-              キャンセル
-            </router-link>
-          </div>
-        </form>
-      </div>
+            <!-- Dates -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label required">開始日</label>
+                <input 
+                  v-model="form.start_date" 
+                  type="date" 
+                  required
+                  class="form-input"
+                >
+              </div>
+              <div class="form-group">
+                <label class="form-label required">終了日</label>
+                <input 
+                  v-model="form.end_date" 
+                  type="date" 
+                  required
+                  class="form-input"
+                >
+              </div>
+            </div>
 
-      <!-- Schedule Management -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold mb-6">日程別スケジュール</h2>
-        
-        <div v-if="plan.days && plan.days.length > 0" class="space-y-6">
-          <DaySchedule 
-            v-for="day in plan.days"
-            :key="day.id"
-            :day-id="day.id"
-            :day-number="day.day_number"
-            :date="day.date"
-            :title="day.title"
-            :items="day.schedule_items || []"
-            @add-item="handleAddScheduleItem"
-            @update-item="handleUpdateScheduleItem"
-            @delete-item="handleDeleteScheduleItem"
-            @update-title="handleUpdateDayTitle"
-            @refresh="refreshPlan"
-          />
-        </div>
-        
-        <div v-else class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-          <p class="text-yellow-800">日程がまだ作成されていません。基本情報を保存すると、日程が自動作成されます。</p>
-        </div>
-      </div>
+            <!-- Memo -->
+            <div class="form-group">
+              <label class="form-label">メモ</label>
+              <textarea 
+                v-model="form.memo" 
+                rows="4"
+                class="form-input"
+                placeholder="その他のメモや注意事項を記入してください"
+              ></textarea>
+            </div>
 
-      <!-- Image Management -->
-            <!-- Image Management -->
-      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-8 border-2 border-blue-200">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="p-3 bg-blue-600 rounded-full">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <!-- Public -->
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input 
+                  v-model="form.is_public" 
+                  type="checkbox"
+                  class="checkbox-input"
+                >
+                <span class="checkbox-text">🌐 このプランを公開する</span>
+              </label>
+              <p class="form-hint">公開すると、他のユーザーがこのプランを閲覧できます</p>
+            </div>
+
+            <!-- Error Message -->
+            <div v-if="error" class="error-message">
+              <span class="error-icon">⚠️</span>
+              <p>{{ error }}</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-actions">
+              <button 
+                type="submit" 
+                :disabled="planStore.loading"
+                class="btn btn-primary"
+              >
+                <span v-if="!planStore.loading">✓ 基本情報を更新</span>
+                <span v-else>更新中...</span>
+              </button>
+              <router-link 
+                :to="`/plans/${plan.id}`" 
+                class="btn btn-secondary"
+              >
+                キャンセル
+              </router-link>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Schedule Section -->
+      <section id="schedule" class="content-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📅</div>
+            <div class="section-info">
+              <h2 class="section-title">日程別スケジュール</h2>
+              <p class="section-description">各日程のスケジュールを管理できます</p>
+            </div>
           </div>
-          <div>
-            <h2 class="text-2xl font-bold text-gray-800">画像管理</h2>
-            <p class="text-sm text-gray-600">旅の思い出の写真や参考画像を追加できます</p>
+          
+          <div v-if="plan.days && plan.days.length > 0" class="schedule-content">
+            <DaySchedule 
+              v-for="day in plan.days"
+              :key="day.id"
+              :day-id="day.id"
+              :day-number="day.day_number"
+              :date="day.date"
+              :title="day.title"
+              :items="day.schedule_items || []"
+              @add-item="handleAddScheduleItem"
+              @update-item="handleUpdateScheduleItem"
+              @delete-item="handleDeleteScheduleItem"
+              @update-title="handleUpdateDayTitle"
+              @refresh="refreshPlan"
+            />
+          </div>
+          
+          <div v-else class="info-message">
+            <span class="info-icon">ℹ️</span>
+            <div>
+              <p class="info-title">日程がまだ作成されていません</p>
+              <p class="info-text">基本情報を保存すると、日程が自動作成されます</p>
+            </div>
           </div>
         </div>
-        
-        <!-- Upload Section -->
-        <div class="mb-8">
-          <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span class="text-2xl">⬆️</span>
-            画像を追加
-          </h3>
-          <ImageUploader
-            imageable-type="plan"
-            :imageable-id="plan.id"
-            @uploaded="handleImagesUploaded"
-          />
+      </section>
+
+      <!-- Images Section -->
+      <section id="images" class="content-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📸</div>
+            <div class="section-info">
+              <h2 class="section-title">画像管理</h2>
+              <p class="section-description">旅の思い出の写真や参考画像を追加できます</p>
+            </div>
+          </div>
+          
+          <div class="image-content">
+            <!-- Upload Section -->
+            <div class="upload-section">
+              <h3 class="subsection-title">⬆️ 画像を追加</h3>
+              <ImageUploader
+                imageable-type="plan"
+                :imageable-id="plan.id"
+                @uploaded="handleImagesUploaded"
+              />
+            </div>
+            
+            <!-- Gallery Section -->
+            <div v-if="plan.images && plan.images.length > 0" class="gallery-section">
+              <h3 class="subsection-title">🖼️ アップロード済み画像 ({{ plan.images.length }}枚)</h3>
+              <ImageGallery
+                :images="plan.images"
+                @delete="handleDeleteImage"
+              />
+            </div>
+            
+            <div v-else class="empty-state">
+              <p class="empty-title">まだ画像が追加されていません</p>
+              <p class="empty-text">上のエリアから画像をアップロードしてください</p>
+            </div>
+          </div>
         </div>
-        
-        <!-- Gallery Section -->
-        <div v-if="plan.images && plan.images.length > 0">
-          <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span class="text-2xl">🖼️</span>
-            アップロード済み画像 ({{ plan.images.length }}枚)
-          </h3>
-          <ImageGallery
-            :images="plan.images"
-            @delete="handleDeleteImage"
-          />
-        </div>
-        
-        <div v-else class="text-center py-8 bg-white rounded-lg border-2 border-dashed border-gray-300">
-          <p class="text-gray-500">まだ画像が追加されていません</p>
-          <p class="text-sm text-gray-400 mt-1">上のエリアから画像をアップロードしてください</p>
-        </div>
-      </div>
+      </section>
 
       <!-- Attachments Section -->
-      <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-cyan-100">
-        <AttachmentManager
-          :plan-id="plan.id"
-          :can-edit="true"
-        />
-      </div>
+      <section id="attachments" class="content-section">
+        <div class="section-card">
+          <AttachmentManager
+            :plan-id="plan.id"
+            :can-edit="true"
+          />
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -318,3 +361,426 @@ onMounted(() => {
   planStore.fetchPlan(route.params.id);
 });
 </script>
+
+<style scoped>
+.plan-edit-page {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem 3rem;
+}
+
+/* Page Header */
+.page-header {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Section Navigation */
+.section-nav {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 2px solid #e0f2fe;
+}
+
+.nav-item {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  color: #0891b2;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.nav-item:hover {
+  background: linear-gradient(135deg, #e0f2fe 0%, #cffafe 100%);
+  border-color: #06b6d4;
+  color: #0e7490;
+}
+
+/* Content Section */
+.content-section {
+  margin-bottom: 2rem;
+  scroll-margin-top: 6rem;
+}
+
+.section-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e0f2fe;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0f2fe;
+}
+
+.section-icon {
+  font-size: 2.5rem;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border-radius: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+}
+
+.section-info {
+  flex: 1;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.section-description {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Form Elements */
+.form-content {
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-label.required::after {
+  content: " *";
+  color: #06b6d4;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid #e0f2fe;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #06b6d4;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+.form-hint {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+}
+
+/* Checkbox */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.75rem;
+}
+
+.checkbox-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #06b6d4;
+  cursor: pointer;
+}
+
+.checkbox-text {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.875rem 2rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0f2fe;
+}
+
+/* Messages */
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #fef2f2;
+  border: 2px solid #fecaca;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.error-message p {
+  color: #dc2626;
+  margin: 0;
+  font-weight: 500;
+}
+
+.info-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f0f9ff;
+  border: 2px solid #bae6fd;
+  border-radius: 0.75rem;
+}
+
+.info-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.info-title {
+  font-weight: 600;
+  color: #0c4a6e;
+  margin: 0 0 0.25rem 0;
+}
+
+.info-text {
+  color: #075985;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Schedule Content */
+.schedule-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Image Content */
+.image-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.upload-section,
+.gallery-section {
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 1rem;
+  border: 2px solid #bae6fd;
+}
+
+.subsection-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0c4a6e;
+  margin: 0 0 1rem 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 1rem;
+}
+
+.empty-title {
+  color: #64748b;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-text {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #64748b;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  border: 4px solid #e0f2fe;
+  border-top-color: #06b6d4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .plan-edit-page {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .plan-edit-page {
+    padding: 1rem;
+  }
+  
+  .page-header {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .section-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .section-icon {
+    width: 3rem;
+    height: 3rem;
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .section-nav {
+    padding: 0.75rem;
+  }
+  
+  .nav-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+</style>
