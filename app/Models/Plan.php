@@ -95,8 +95,15 @@ class Plan extends Model
         }
 
         // Regular users can view plans from same team
-        if ($user->isRegularUser() && $this->user) {
-            return $user->isSameTeam($this->user);
+        if ($user->isRegularUser()) {
+            // Load the plan owner if not already loaded
+            if (!$this->relationLoaded('user')) {
+                $this->load('user');
+            }
+            
+            if ($this->user) {
+                return $user->isSameTeam($this->user);
+            }
         }
 
         return false;
@@ -123,8 +130,15 @@ class Plan extends Model
         }
 
         // Regular users can edit plans from same team
-        if ($user->isRegularUser() && $this->user) {
-            return $user->isSameTeam($this->user);
+        if ($user->isRegularUser()) {
+            // Load the plan owner if not already loaded
+            if (!$this->relationLoaded('user')) {
+                $this->load('user');
+            }
+            
+            if ($this->user) {
+                return $user->isSameTeam($this->user);
+            }
         }
 
         return false;

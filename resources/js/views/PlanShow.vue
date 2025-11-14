@@ -20,24 +20,24 @@
             </h1>
             <p class="text-gray-700 text-lg leading-relaxed">{{ plan.description }}</p>
           </div>
-          <div class="flex gap-3">
+          <div class="flex gap-3 flex-wrap">
+            <button 
+              @click="downloadPdf"
+              class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap"
+            >
+              📄 PDF
+            </button>
             <router-link 
               v-if="canEdit"
               :to="`/plans/${plan.id}/edit`" 
-              class="px-6 py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
+              class="px-6 py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap"
             >
               ✏️ 編集
             </router-link>
             <button 
-              @click="downloadPdf"
-              class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
-            >
-              📄 PDF
-            </button>
-            <button 
               v-if="canEdit"
               @click="handleDelete"
-              class="px-6 py-3 bg-gradient-to-r from-red-400 to-pink-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
+              class="px-6 py-3 bg-gradient-to-r from-red-400 to-pink-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap"
             >
               🗑️ 削除
             </button>
@@ -254,7 +254,23 @@ const plan = computed(() => planStore.currentPlan);
 
 const canEdit = computed(() => {
   if (!plan.value) return false;
-  // Use the can_edit flag from the API response
+  
+  // Debug: Log permission info
+  console.log('Plan permissions:', {
+    can_edit: plan.value.can_edit,
+    can_delete: plan.value.can_delete,
+    user_id: plan.value.user_id,
+    current_user: authStore.user,
+    is_authenticated: authStore.isAuthenticated,
+    user_is_admin: authStore.user?.is_admin
+  });
+  
+  // If user is admin, always allow edit
+  if (authStore.user?.is_admin === true) {
+    return true;
+  }
+  
+  // Otherwise use the can_edit flag from the API response
   return plan.value.can_edit === true;
 });
 
