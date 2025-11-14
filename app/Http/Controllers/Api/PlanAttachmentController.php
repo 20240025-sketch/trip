@@ -19,7 +19,7 @@ class PlanAttachmentController extends Controller
     {
         $plan = Plan::findOrFail($planId);
         
-        // Check if user can view this plan
+        // Check if user can view this plan (allow null user for public plans)
         if (!$plan->canView($request->user())) {
             return response()->json([
                 'message' => 'この旅行計画を閲覧する権限がありません。'
@@ -128,7 +128,7 @@ class PlanAttachmentController extends Controller
     {
         $plan = Plan::findOrFail($planId);
         
-        // Check if user can view this plan
+        // Check if user can view this plan (allow null user for public plans)
         if (!$plan->canView($request->user())) {
             return response()->json([
                 'message' => 'この旅行計画を閲覧する権限がありません。'

@@ -59,12 +59,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('images/{image}', [ImageController::class, 'update']);
     Route::delete('images/{image}', [ImageController::class, 'destroy']);
     
-    // Plan Attachments
-    Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
+    // Plan Attachments - write operations only
     Route::post('plans/{plan}/attachments', [PlanAttachmentController::class, 'store']);
     Route::delete('plans/{plan}/attachments/{attachment}', [PlanAttachmentController::class, 'destroy']);
-    Route::get('plans/{plan}/attachments/{attachment}/download', [PlanAttachmentController::class, 'download']);
 });
+
+// Plan Attachments - read operations are public (respects plan visibility)
+Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
+Route::get('plans/{plan}/attachments/{attachment}/download', [PlanAttachmentController::class, 'download']);
 
 // Plans - index and show are public
 Route::get('plans', [PlanController::class, 'index']);
