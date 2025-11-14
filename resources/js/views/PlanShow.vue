@@ -10,115 +10,115 @@
       <div class="text-red-600 text-xl">{{ planStore.error }}</div>
     </div>
 
-    <div v-else-if="plan" class="max-w-6xl mx-auto px-4">
+    <div v-else-if="plan" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
-      <div class="bg-gradient-to-br from-white via-cyan-50 to-blue-50 rounded-3xl shadow-2xl p-8 mb-8 border-2 border-cyan-200">
-        <div class="flex justify-between items-start mb-6">
+      <div class="bg-gradient-to-br from-white via-cyan-50 to-blue-50 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border-2 border-cyan-200">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
           <div class="flex-1">
-            <h1 class="text-5xl font-black mb-4 bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent break-words">
               {{ plan.title }} ✨
             </h1>
-            <p class="text-gray-700 text-lg leading-relaxed">{{ plan.description }}</p>
+            <p class="text-gray-700 text-base sm:text-lg leading-relaxed">{{ plan.description }}</p>
           </div>
-          <div class="flex gap-3 flex-wrap">
+          <div class="flex gap-2 sm:gap-3 flex-wrap justify-start sm:justify-end">
             <button 
               @click="downloadPdf"
-              class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap"
+              class="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap text-sm sm:text-base"
             >
               📄 PDF
             </button>
             <router-link 
               v-if="canEdit"
               :to="`/plans/${plan.id}/edit`" 
-              class="px-6 py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap"
+              class="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap text-sm sm:text-base"
             >
               ✏️ 編集
             </router-link>
             <button 
               v-if="canEdit"
               @click="handleDelete"
-              class="px-6 py-3 bg-gradient-to-r from-red-400 to-pink-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap"
+              class="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-red-400 to-pink-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap text-sm sm:text-base"
             >
               🗑️ 削除
             </button>
           </div>
         </div>
         
-        <div class="flex gap-6 items-center flex-wrap">
-          <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm">
-            <span class="text-2xl">📅</span>
-            <span class="font-semibold text-gray-700">{{ formatDateRange(plan.start_date, plan.end_date) }}</span>
+        <div class="flex gap-3 sm:gap-6 items-center flex-wrap">
+          <div class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white rounded-full shadow-sm">
+            <span class="text-xl sm:text-2xl">📅</span>
+            <span class="font-semibold text-gray-700 text-sm sm:text-base">{{ formatDateRange(plan.start_date, plan.end_date) }}</span>
           </div>
-          <div v-if="plan.is_public" class="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full shadow-sm">
-            <span class="text-2xl">🌐</span>
-            <span class="font-bold text-green-700">公開中</span>
+          <div v-if="plan.is_public" class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-green-100 rounded-full shadow-sm">
+            <span class="text-xl sm:text-2xl">🌐</span>
+            <span class="font-bold text-green-700 text-sm sm:text-base">公開中</span>
           </div>
         </div>
 
-        <div v-if="plan.is_public" class="mt-6 p-5 bg-gradient-to-r from-blue-100 to-purple-100 border-2 border-blue-200 rounded-2xl">
-          <p class="text-sm font-bold text-gray-800 mb-2">🔗 公開URL</p>
-          <a :href="`/p/${plan.slug}`" target="_blank" class="text-blue-600 hover:text-blue-700 underline font-medium break-all">
+        <div v-if="plan.is_public" class="mt-4 sm:mt-6 p-4 sm:p-5 bg-gradient-to-r from-blue-100 to-purple-100 border-2 border-blue-200 rounded-xl sm:rounded-2xl">
+          <p class="text-xs sm:text-sm font-bold text-gray-800 mb-2">🔗 公開URL</p>
+          <a :href="`/p/${plan.slug}`" target="_blank" class="text-blue-600 hover:text-blue-700 underline font-medium break-all text-xs sm:text-base">
             {{ publicUrl }}
           </a>
         </div>
       </div>
 
       <!-- Days Timeline -->
-      <div class="space-y-6">
-        <div v-for="day in plan.days" :key="day.id" class="bg-white rounded-3xl shadow-lg p-8 border-2 border-gray-100 hover:shadow-xl transition-shadow duration-300">
-          <div class="flex justify-between items-start mb-6">
+      <div class="space-y-4 sm:space-y-6">
+        <div v-for="day in plan.days" :key="day.id" class="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 lg:p-8 border-2 border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4 sm:mb-6">
             <div>
-              <h2 class="text-3xl font-bold text-gray-800 mb-2">
-                <span class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-4 py-1 rounded-full text-lg inline-block">
+              <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+                <span class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1 sm:px-4 rounded-full text-base sm:text-lg inline-block">
                   Day {{ day.day_number }}
                 </span>
               </h2>
-              <p class="text-xl text-gray-600 font-semibold">
+              <p class="text-lg sm:text-xl text-gray-600 font-semibold">
                 {{ formatDate(day.date) }}
-                <span v-if="day.title" class="text-purple-600 ml-2">
+                <span v-if="day.title" class="text-purple-600 ml-2 block sm:inline mt-1 sm:mt-0">
                   - {{ day.title }}
                 </span>
               </p>
             </div>
             <router-link 
               :to="`/plans/${plan.id}/edit`"
-              class="px-5 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 hover:scale-105 transition-all duration-300 font-bold text-sm"
+              class="px-4 py-2 sm:px-5 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 hover:scale-105 transition-all duration-300 font-bold text-xs sm:text-sm text-center"
             >
               ✏️ 編集
             </router-link>
           </div>
 
-          <div v-if="day.schedule_items && day.schedule_items.length > 0" class="space-y-4">
+          <div v-if="day.schedule_items && day.schedule_items.length > 0" class="space-y-3 sm:space-y-4">
             <div 
               v-for="item in day.schedule_items" 
               :key="item.id"
-              class="flex gap-4 border-l-4 border-purple-400 pl-6 py-4 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 transition-all duration-300 rounded-r-2xl"
+              class="flex flex-col sm:flex-row gap-3 sm:gap-4 border-l-4 border-purple-400 pl-4 sm:pl-6 py-3 sm:py-4 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 transition-all duration-300 rounded-r-xl sm:rounded-r-2xl"
             >
-              <div class="flex-shrink-0 w-24">
-                <div class="text-2xl font-black text-transparent bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text">
+              <div class="flex-shrink-0 sm:w-24">
+                <div class="text-xl sm:text-2xl font-black text-transparent bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text">
                   {{ item.time }}
                 </div>
               </div>
               <div class="flex-1">
-                <h3 class="font-bold text-xl mb-2 text-gray-800">{{ item.title }}</h3>
-                <p v-if="item.description" class="text-gray-600 mb-3 leading-relaxed">
+                <h3 class="font-bold text-lg sm:text-xl mb-2 text-gray-800">{{ item.title }}</h3>
+                <p v-if="item.description" class="text-gray-600 mb-3 leading-relaxed text-sm sm:text-base">
                   {{ item.description }}
                 </p>
-                <p v-if="item.location" class="text-gray-500 mb-3 flex items-center gap-2">
-                  <span class="text-lg">📍</span>
+                <p v-if="item.location" class="text-gray-500 mb-3 flex items-center gap-2 text-sm sm:text-base">
+                  <span class="text-base sm:text-lg">📍</span>
                   <span class="font-medium">{{ item.location }}</span>
                 </p>
               
               <!-- Transport Info -->
-              <div v-if="item.transport_type" class="mt-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-blue-100">
-                <div class="flex items-center gap-2 text-gray-700">
+              <div v-if="item.transport_type" class="mt-3 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg sm:rounded-xl border-2 border-blue-100">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-gray-700 text-sm sm:text-base">
                   <span class="font-bold">
                     {{ transportLabel(item.transport_type) }}
                   </span>
                   <span v-if="item.transport_from && item.transport_to" class="flex-1">
                     {{ item.transport_from }} → {{ item.transport_to }}
                   </span>
-                  <div class="flex gap-3 text-gray-600">
+                  <div class="flex gap-3 text-gray-600 text-sm">
                     <span v-if="item.transport_duration">
                       ⏱️ {{ item.transport_duration }}分
                     </span>
@@ -130,7 +130,7 @@
               </div>
 
               <!-- Images -->
-              <div v-if="item.images && item.images.length > 0" class="mt-3 flex gap-2">
+              <div v-if="item.images && item.images.length > 0" class="mt-3 flex gap-2 flex-wrap">
                 <img 
                   v-for="image in item.images" 
                   :key="image.id"
@@ -156,20 +156,20 @@
       </div>
 
     <!-- Participants -->
-    <div v-if="plan.participants && plan.participants.length > 0" class="mt-8 bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-bold mb-4">参加者</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-if="plan.participants && plan.participants.length > 0" class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-lg shadow-md p-4 sm:p-6">
+      <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">参加者</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <div 
           v-for="participant in plan.participants" 
           :key="participant.id"
           class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
         >
-          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base">
             {{ participant.name.charAt(0) }}
           </div>
-          <div>
-            <div class="font-bold">{{ participant.name }}</div>
-            <div v-if="participant.contact" class="text-sm text-gray-600">
+          <div class="min-w-0 flex-1">
+            <div class="font-bold text-sm sm:text-base truncate">{{ participant.name }}</div>
+            <div v-if="participant.contact" class="text-xs sm:text-sm text-gray-600 truncate">
               {{ participant.contact }}
             </div>
           </div>
@@ -178,24 +178,24 @@
     </div>
 
     <!-- Checklist -->
-    <div v-if="plan.checklist_items && plan.checklist_items.length > 0" class="mt-8 bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-bold mb-4">チェックリスト</h2>
-      <div class="space-y-4">
+    <div v-if="plan.checklist_items && plan.checklist_items.length > 0" class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-lg shadow-md p-4 sm:p-6">
+      <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">チェックリスト</h2>
+      <div class="space-y-3 sm:space-y-4">
         <div v-for="(items, category) in groupedChecklist" :key="category">
-          <h3 class="font-bold text-lg mb-2">{{ category }}</h3>
+          <h3 class="font-bold text-base sm:text-lg mb-2">{{ category }}</h3>
           <div class="space-y-2">
             <label 
               v-for="item in items" 
               :key="item.id"
-              class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+              class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors text-sm sm:text-base"
             >
               <input 
                 type="checkbox" 
                 :checked="item.is_checked"
                 @change="toggleChecklistItem(item.id)"
-                class="w-5 h-5 text-blue-600 cursor-pointer"
+                class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 cursor-pointer flex-shrink-0"
               >
-              <span :class="{ 'line-through text-gray-400': item.is_checked }">
+              <span :class="{ 'line-through text-gray-400': item.is_checked }" class="break-words">
                 {{ item.item }}
               </span>
             </label>
@@ -205,20 +205,20 @@
     </div>
 
     <!-- Memo -->
-    <div v-if="plan.memo" class="mt-8 bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-bold mb-4">メモ</h2>
-      <p class="whitespace-pre-wrap text-gray-700">{{ plan.memo }}</p>
+    <div v-if="plan.memo" class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-lg shadow-md p-4 sm:p-6">
+      <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">メモ</h2>
+      <p class="whitespace-pre-wrap text-gray-700 text-sm sm:text-base leading-relaxed">{{ plan.memo }}</p>
     </div>
 
     <!-- Images -->
-    <div v-if="plan.images && plan.images.length > 0" class="mt-8 bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-bold mb-4">画像 ({{ plan.images.length }}枚)</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div v-if="plan.images && plan.images.length > 0" class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-lg shadow-md p-4 sm:p-6">
+      <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">画像 ({{ plan.images.length }}枚)</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
         <div v-for="image in plan.images" :key="image.id" class="relative group">
           <img 
             :src="`/storage/${image.thumbnail_path || image.image_path}`"
             :alt="image.original_name || 'Image'"
-            class="w-full h-32 object-cover rounded-lg cursor-pointer shadow hover:shadow-lg transition-shadow"
+            class="w-full h-24 sm:h-32 object-cover rounded-lg cursor-pointer shadow hover:shadow-lg transition-shadow"
             @click="viewImage(image)"
           >
         </div>
@@ -226,7 +226,7 @@
     </div>
 
     <!-- Attachments -->
-    <div class="mt-8 bg-white rounded-2xl shadow-xl p-8 border-2 border-cyan-100">
+    <div class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-cyan-100">
       <AttachmentManager
         :plan-id="plan.id"
         :can-edit="canEdit"
