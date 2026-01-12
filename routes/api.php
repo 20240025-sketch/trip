@@ -55,7 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('checklist-items', ChecklistItemController::class)->except(['index', 'store']);
     
     // Images
-    Route::post('images/upload', [ImageController::class, 'upload']);
+    Route::post('images', [ImageController::class, 'upload']);
+    Route::post('images/upload', [ImageController::class, 'upload']); // Alias for backwards compatibility
     Route::put('images/{image}', [ImageController::class, 'update']);
     Route::delete('images/{image}', [ImageController::class, 'destroy']);
     

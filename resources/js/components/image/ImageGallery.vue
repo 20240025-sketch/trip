@@ -44,19 +44,31 @@ const props = defineProps({
 const emit = defineEmits(['view', 'delete']);
 
 const getImageUrl = (image) => {
-  // Use thumbnail if available, otherwise use original
+  // Use thumbnail if available, otherwise use original path
   if (image.thumbnail_path) {
-    return `/storage/${image.thumbnail_path}`;
+    // Check if path already includes /storage/
+    return image.thumbnail_path.startsWith('/storage/') ? image.thumbnail_path : `/storage/${image.thumbnail_path}`;
+  }
+  if (image.path) {
+    return image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
   }
   if (image.image_path) {
-    return `/storage/${image.image_path}`;
+    return image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
   }
   // Fallback
-  return image.file_path ? `/storage/${image.file_path}` : '';
+  return image.file_path ? (image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`) : '';
 };
 
 const handleView = (image) => {
-  const url = image.image_path ? `/storage/${image.image_path}` : `/storage/${image.file_path}`;
+  // Use original image path for viewing
+  let url = '';
+  if (image.path) {
+    url = image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
+  } else if (image.image_path) {
+    url = image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
+  } else if (image.file_path) {
+    url = image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`;
+  }
   window.open(url, '_blank');
 };
 

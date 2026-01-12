@@ -13,6 +13,8 @@ class Plan extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'name',
+        'participant_count',
         'description',
         'start_date',
         'end_date',

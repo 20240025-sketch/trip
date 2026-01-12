@@ -53,6 +53,40 @@
               >
             </div>
 
+            <!-- Participant Count -->
+            <div class="form-group">
+              <label class="form-label">人数</label>
+              <input 
+                v-model.number="form.participant_count" 
+                type="number" 
+                min="1"
+                max="1000"
+                class="form-input"
+                placeholder="例: 4"
+                @input="updateParticipantsArray"
+              >
+            </div>
+
+            <!-- Participants Names -->
+            <div v-if="participants.length > 0" class="form-group">
+              <label class="form-label">参加者名</label>
+              <div class="participants-list">
+                <div 
+                  v-for="(participant, index) in participants" 
+                  :key="index"
+                  class="participant-item"
+                >
+                  <label class="participant-label">参加者{{ index + 1 }}</label>
+                  <input 
+                    v-model="participants[index].name" 
+                    type="text" 
+                    class="form-input"
+                    :placeholder="`参加者${index + 1}の名前`"
+                  >
+                </div>
+              </div>
+            </div>
+
             <!-- Description -->
             <div class="form-group">
               <label class="form-label">説明</label>
@@ -249,6 +283,7 @@ const plan = computed(() => planStore.currentPlan);
 
 const form = ref({
   title: '',
+  participant_count: null,
   description: '',
   start_date: '',
   end_date: '',
@@ -256,31 +291,97 @@ const form = ref({
   is_public: false,
 });
 
+const participants = ref([]);
+
 const error = ref('');
 
 watch(plan, (newPlan) => {
   if (newPlan) {
     form.value = {
       title: newPlan.title,
+      participant_count: newPlan.participant_count || null,
       description: newPlan.description || '',
       start_date: newPlan.start_date,
       end_date: newPlan.end_date,
       memo: newPlan.memo || '',
       is_public: newPlan.is_public,
     };
+    
+    // 既存の参加者データを読み込む
+    if (newPlan.participants && newPlan.participants.length > 0) {
+      participants.value = newPlan.participants.map(p => ({
+        id: p.id,
+        name: p.name || '',
+        contact: p.contact || '',
+      }));
+    } else if (newPlan.participant_count > 0) {
+      // participant_countがあるが参加者データがない場合は空の配列を作成
+      updateParticipantsArray();
+    }
   }
 });
+
+const updateParticipantsArray = () => {
+  const count = form.value.participant_count || 0;
+  const currentLength = participants.value.length;
+  
+  if (count > currentLength) {
+    // 人数が増えた場合、新しい参加者を追加
+    for (let i = currentLength; i < count; i++) {
+      participants.value.push({
+        name: '',
+        contact: '',
+      });
+    }
+  } else if (count < currentLength) {
+    // 人数が減った場合、余分な参加者を削除
+    participants.value = participants.value.slice(0, count);
+  }
+};
 
 const handleSubmit = async () => {
   error.value = '';
   
   try {
+    // 基本情報を更新
     await planStore.updatePlan(plan.value.id, form.value);
+    
+    // 参加者情報を更新
+    await saveParticipants();
+    
     uiStore.showSuccess('基本情報を更新しました');
     // Reload to get updated days
     await planStore.fetchPlan(plan.value.id);
   } catch (err) {
     error.value = planStore.error || 'プランの更新に失敗しました';
+  }
+};
+
+const saveParticipants = async () => {
+  if (participants.value.length === 0) return;
+  
+  try {
+    // 既存の参加者を更新または新規作成
+    for (const participant of participants.value) {
+      if (participant.name) {  // 名前が入力されている場合のみ
+        if (participant.id) {
+          // 既存の参加者を更新
+          await axios.put(`/api/participants/${participant.id}`, {
+            name: participant.name,
+            contact: participant.contact,
+          });
+        } else {
+          // 新規参加者を作成
+          await axios.post(`/api/plans/${plan.value.id}/participants`, {
+            name: participant.name,
+            contact: participant.contact,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to save participants:', err);
+    throw err;
   }
 };
 
@@ -740,6 +841,42 @@ onMounted(() => {
 .btn-secondary:hover {
   background: #e2e8f0;
   border-color: #cbd5e1;
+}
+
+/* Participants List */
+.participants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.participant-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+@media (min-width: 640px) {
+  .participant-item {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.participant-label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.875rem;
+  min-width: 5rem;
+}
+
+.participant-item .form-input {
+  margin: 0;
 }
 
 .form-actions {

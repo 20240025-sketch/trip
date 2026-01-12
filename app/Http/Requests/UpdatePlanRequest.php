@@ -23,6 +23,8 @@ class UpdatePlanRequest extends FormRequest
     {
         return [
             'title' => 'sometimes|required|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'participant_count' => 'nullable|integer|min:1|max:1000',
             'description' => 'nullable|string|max:5000',
             'start_date' => 'sometimes|required|date',
             'end_date' => 'sometimes|required|date|after_or_equal:start_date',
@@ -40,6 +42,10 @@ class UpdatePlanRequest extends FormRequest
         return [
             'title.required' => 'タイトルは必須です。',
             'title.max' => 'タイトルは255文字以内で入力してください。',
+            'name.max' => '名前は255文字以内で入力してください。',
+            'participant_count.integer' => '人数は整数である必要があります。',
+            'participant_count.min' => '人数は1以上である必要があります。',
+            'participant_count.max' => '人数は1000以下である必要があります。',
             'start_date.required' => '開始日は必須です。',
             'start_date.date' => '開始日は有効な日付である必要があります。',
             'end_date.required' => '終了日は必須です。',
