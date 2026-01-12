@@ -69,20 +69,36 @@
 
             <!-- Participants Names -->
             <div v-if="participants.length > 0" class="form-group">
-              <label class="form-label">参加者名</label>
+              <label class="form-label">参加者情報</label>
               <div class="participants-list">
                 <div 
                   v-for="(participant, index) in participants" 
                   :key="index"
                   class="participant-item"
                 >
-                  <label class="participant-label">参加者{{ index + 1 }}</label>
-                  <input 
-                    v-model="participants[index].name" 
-                    type="text" 
-                    class="form-input"
-                    :placeholder="`参加者${index + 1}の名前`"
-                  >
+                  <div class="participant-header">
+                    <label class="participant-label">参加者{{ index + 1 }}</label>
+                  </div>
+                  <div class="participant-fields">
+                    <div class="participant-field">
+                      <label class="field-label">名前</label>
+                      <input 
+                        v-model="participants[index].name" 
+                        type="text" 
+                        class="form-input"
+                        :placeholder="`参加者${index + 1}の名前`"
+                      >
+                    </div>
+                    <div class="participant-field">
+                      <label class="field-label">クラス名</label>
+                      <input 
+                        v-model="participants[index].class_name" 
+                        type="text" 
+                        class="form-input"
+                        :placeholder="`例: A組`"
+                      >
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -312,6 +328,7 @@ watch(plan, (newPlan) => {
       participants.value = newPlan.participants.map(p => ({
         id: p.id,
         name: p.name || '',
+        class_name: p.class_name || '',
         contact: p.contact || '',
       }));
     } else if (newPlan.participant_count > 0) {
@@ -330,6 +347,7 @@ const updateParticipantsArray = () => {
     for (let i = currentLength; i < count; i++) {
       participants.value.push({
         name: '',
+        class_name: '',
         contact: '',
       });
     }
@@ -368,12 +386,14 @@ const saveParticipants = async () => {
           // 既存の参加者を更新
           await axios.put(`/api/participants/${participant.id}`, {
             name: participant.name,
+            class_name: participant.class_name,
             contact: participant.contact,
           });
         } else {
           // 新規参加者を作成
           await axios.post(`/api/plans/${plan.value.id}/participants`, {
             name: participant.name,
+            class_name: participant.class_name,
             contact: participant.contact,
           });
         }
@@ -854,25 +874,56 @@ onMounted(() => {
 .participant-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 1.25rem;
   background: #f8fafc;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   border: 1px solid #e2e8f0;
 }
 
-@media (min-width: 640px) {
-  .participant-item {
-    flex-direction: row;
-    align-items: center;
-  }
+.participant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
 }
 
 .participant-label {
+  font-weight: 700;
+  color: #334155;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.participant-label::before {
+  content: '👤';
+  font-size: 1.2rem;
+}
+
+.participant-fields {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .participant-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.participant-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
   font-weight: 600;
-  color: #475569;
+  color: #64748b;
   font-size: 0.875rem;
-  min-width: 5rem;
 }
 
 .participant-item .form-input {

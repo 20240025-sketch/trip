@@ -10,6 +10,7 @@ class Participant extends Model
     protected $fillable = [
         'plan_id',
         'name',
+        'class_name',
         'contact',
         'avatar',
     ];

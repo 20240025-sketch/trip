@@ -32,6 +32,7 @@ class ParticipantController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'class_name' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:255',
             'avatar' => 'nullable|string|max:255',
         ]);
@@ -65,6 +66,7 @@ class ParticipantController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
+            'class_name' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:255',
             'avatar' => 'nullable|string|max:255',
         ]);

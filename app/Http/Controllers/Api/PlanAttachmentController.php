@@ -19,8 +19,10 @@ class PlanAttachmentController extends Controller
     {
         $plan = Plan::findOrFail($planId);
         
-        // Check if user can view this plan (allow null user for public plans)
-        if (!$plan->canView($request->user())) {
+        $user = $request->user();
+        
+        // Check if user can view this plan
+        if (!$plan->canView($user) && !$plan->canEdit($user)) {
             return response()->json([
                 'message' => 'この旅行計画を閲覧する権限がありません。'
             ], 403);

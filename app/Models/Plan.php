@@ -76,14 +76,14 @@ class Plan extends Model
      */
     public function canView(?User $user): bool
     {
-        // Public plans can be viewed by anyone
-        if ($this->is_public) {
-            return true;
+        // Not authenticated users can only view public plans
+        if (!$user) {
+            return $this->is_public;
         }
 
-        // Not authenticated users cannot view private plans
-        if (!$user) {
-            return false;
+        // Owner can always view their own plan
+        if ((int)$this->user_id === (int)$user->id) {
+            return true;
         }
 
         // Admins can view all plans
@@ -91,8 +91,8 @@ class Plan extends Model
             return true;
         }
 
-        // Owner can view their own plan
-        if ($this->user_id === $user->id) {
+        // Public plans can be viewed by anyone
+        if ($this->is_public) {
             return true;
         }
 
@@ -103,8 +103,8 @@ class Plan extends Model
                 $this->load('user');
             }
             
-            if ($this->user) {
-                return $user->isSameTeam($this->user);
+            if ($this->user && $user->isSameTeam($this->user)) {
+                return true;
             }
         }
 
@@ -121,13 +121,13 @@ class Plan extends Model
             return false;
         }
 
-        // Admins can edit all plans
-        if ($user->isAdmin()) {
+        // Owner can always edit their own plan
+        if ((int)$this->user_id === (int)$user->id) {
             return true;
         }
 
-        // Owner can edit their own plan
-        if ($this->user_id === $user->id) {
+        // Admins can edit all plans
+        if ($user->isAdmin()) {
             return true;
         }
 
@@ -138,8 +138,8 @@ class Plan extends Model
                 $this->load('user');
             }
             
-            if ($this->user) {
-                return $user->isSameTeam($this->user);
+            if ($this->user && $user->isSameTeam($this->user)) {
+                return true;
             }
         }
 

@@ -20,6 +20,8 @@ class PlanResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'title' => $this->title,
+            'name' => $this->name,
+            'participant_count' => $this->participant_count,
             'description' => $this->description,
             'start_date' => $this->start_date?->format('Y-m-d'),
             'end_date' => $this->end_date?->format('Y-m-d'),

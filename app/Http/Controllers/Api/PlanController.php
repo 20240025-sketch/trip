@@ -68,7 +68,16 @@ class PlanController extends Controller
 
         // Filter by public status
         if ($request->has('is_public')) {
-            $query->where('is_public', $request->boolean('is_public'));
+            $isPublic = $request->boolean('is_public');
+            // If filtering for public plans, also include user's own private plans
+            if ($user && $isPublic) {
+                $query->where(function ($q) use ($user, $isPublic) {
+                    $q->where('is_public', $isPublic)
+                      ->orWhere('user_id', $user->id);
+                });
+            } else {
+                $query->where('is_public', $isPublic);
+            }
         }
 
         // Order by start_date descending
@@ -116,6 +125,10 @@ class PlanController extends Controller
 
         $plan->load('days');
 
+        // Refresh the plan to ensure all data is loaded
+        $plan->refresh();
+        $plan->load('user');
+
         return response()->json([
             'data' => new PlanResource($plan),
             'message' => '計画が作成されました。'
@@ -135,8 +148,36 @@ class PlanController extends Controller
             'user'
         ])->findOrFail($id);
 
+        $user = $request->user();
+        
+        // Log for debugging
+        \Log::info('Plan Show Access Attempt', [
+            'plan_id' => $plan->id,
+            'plan_user_id' => $plan->user_id,
+            'plan_user_id_type' => gettype($plan->user_id),
+            'current_user_id' => $user?->id,
+            'current_user_id_type' => gettype($user?->id),
+            'current_user_email' => $user?->email,
+            'is_public' => $plan->is_public,
+            'user_exists' => $user !== null,
+            'ids_match' => $user && ((int)$plan->user_id === (int)$user->id),
+        ]);
+        
         // Check if user can view this plan
-        if (!$plan->canView($request->user())) {
+        $canView = $plan->canView($user);
+        $canEdit = $plan->canEdit($user);
+        
+        \Log::info('Permission Check Results', [
+            'can_view' => $canView,
+            'can_edit' => $canEdit,
+        ]);
+        
+        if (!$canView && !$canEdit) {
+            \Log::warning('Access Denied', [
+                'plan_id' => $plan->id,
+                'user_id' => $user?->id,
+            ]);
+            
             return response()->json([
                 'message' => 'この計画を閲覧する権限がありません。'
             ], 403);

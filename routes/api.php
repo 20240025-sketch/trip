@@ -63,15 +63,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Plan Attachments - write operations only
     Route::post('plans/{plan}/attachments', [PlanAttachmentController::class, 'store']);
     Route::delete('plans/{plan}/attachments/{attachment}', [PlanAttachmentController::class, 'destroy']);
+    
+    // Plans - show requires auth to check permissions properly
+    Route::get('plans/{plan}', [PlanController::class, 'show']);
+    Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
+    Route::get('plans', [PlanController::class, 'index']);
 });
 
-// Plan Attachments - read operations are public (respects plan visibility)
-Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
+// Plan Attachments - download is public
 Route::get('plans/{plan}/attachments/{attachment}/download', [PlanAttachmentController::class, 'download']);
 
-// Plans - index and show are public
-Route::get('plans', [PlanController::class, 'index']);
-Route::get('plans/{plan}', [PlanController::class, 'show']);
+// Plans - show by slug is public
 Route::get('plans/slug/{slug}', [PlanController::class, 'showBySlug']);
 
 // PDF - public access

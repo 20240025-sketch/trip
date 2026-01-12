@@ -80,8 +80,15 @@ export const usePlanStore = defineStore('plan', {
         this.currentPlan = response.data.data;
         return response.data.data;
       } catch (error) {
-        this.error = error.response?.data?.message || 'プランの作成に失敗しました';
-        console.error(error);
+        // Show validation errors if available
+        if (error.response?.data?.errors) {
+          const errors = Object.values(error.response.data.errors).flat();
+          this.error = errors.join(', ');
+        } else {
+          this.error = error.response?.data?.message || 'プランの作成に失敗しました';
+        }
+        console.error('createPlan error:', error);
+        console.error('Response data:', error.response?.data);
         throw error;
       } finally {
         this.loading = false;

@@ -64,85 +64,62 @@
       </div>
 
       <!-- Days Timeline -->
-      <div class="space-y-4 sm:space-y-6">
-        <div v-for="day in plan.days" :key="day.id" class="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 lg:p-8 border-2 border-gray-100 hover:shadow-xl transition-shadow duration-300">
-          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4 sm:mb-6">
-            <div>
-              <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-                <span class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1 sm:px-4 rounded-full text-base sm:text-lg inline-block">
-                  Day {{ day.day_number }}
-                </span>
-              </h2>
-              <p class="text-lg sm:text-xl text-gray-600 font-semibold">
-                {{ formatDate(day.date) }}
-                <span v-if="day.title" class="text-purple-600 ml-2 block sm:inline mt-1 sm:mt-0">
-                  - {{ day.title }}
-                </span>
-              </p>
-            </div>
+      <div class="space-y-6 sm:space-y-8">
+        <div v-for="day in plan.days" :key="day.id" class="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 border-2 border-blue-100">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 sm:mb-5">
+            <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+              <span class="text-blue-500">Day {{ day.day_number }}:</span> {{ formatDate(day.date) }}
+              <span v-if="day.title" class="text-base sm:text-lg font-normal text-gray-600 ml-2 block sm:inline mt-1 sm:mt-0">
+                - {{ day.title }}
+              </span>
+            </h2>
             <router-link 
               :to="`/plans/${plan.id}/edit`"
-              class="px-4 py-2 sm:px-5 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 hover:scale-105 transition-all duration-300 font-bold text-xs sm:text-sm text-center"
+              class="px-4 py-2 sm:px-5 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 hover:scale-105 transition-all duration-300 font-bold text-xs sm:text-sm text-center"
             >
               ✏️ 編集
             </router-link>
           </div>
 
-          <div v-if="day.schedule_items && day.schedule_items.length > 0" class="space-y-3 sm:space-y-4">
+          <div v-if="day.schedule_items && day.schedule_items.length > 0" class="space-y-4 sm:space-y-5">
             <div 
               v-for="item in day.schedule_items" 
               :key="item.id"
-              class="flex flex-col sm:flex-row gap-3 sm:gap-4 border-l-4 border-purple-400 pl-4 sm:pl-6 py-3 sm:py-4 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 transition-all duration-300 rounded-r-xl sm:rounded-r-2xl"
+              class="flex flex-col sm:flex-row gap-3 sm:gap-4 border-l-4 border-blue-400 pl-4 sm:pl-5 py-3"
             >
-              <div class="flex-shrink-0 sm:w-24">
-                <div class="text-xl sm:text-2xl font-black text-transparent bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text">
-                  {{ item.time }}
-                </div>
+              <div class="flex-shrink-0 sm:w-20 font-bold text-blue-600 text-base sm:text-lg">
+                {{ item.time }}
               </div>
               <div class="flex-1">
-                <h3 class="font-bold text-lg sm:text-xl mb-2 text-gray-800">{{ item.title }}</h3>
-                <p v-if="item.description" class="text-gray-600 mb-3 leading-relaxed text-sm sm:text-base">
+                <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
+                <p v-if="item.description" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed">
                   {{ item.description }}
                 </p>
-                <p v-if="item.location" class="text-gray-500 mb-3 flex items-center gap-2 text-sm sm:text-base">
-                  <span class="text-base sm:text-lg">📍</span>
-                  <span class="font-medium">{{ item.location }}</span>
+                <p v-if="item.location" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">
+                  📍 {{ item.location }}
                 </p>
               
               <!-- Transport Info -->
-              <div v-if="item.transport_type" class="mt-3 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg sm:rounded-xl border-2 border-blue-100">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-gray-700 text-sm sm:text-base">
-                  <span class="font-bold">
-                    {{ transportLabel(item.transport_type) }}
-                  </span>
-                  <span v-if="item.transport_from && item.transport_to" class="flex-1">
-                    {{ item.transport_from }} → {{ item.transport_to }}
-                  </span>
-                  <div class="flex gap-3 text-gray-600 text-sm">
-                    <span v-if="item.transport_duration">
-                      ⏱️ {{ item.transport_duration }}分
-                    </span>
-                    <span v-if="item.transport_cost" class="font-semibold">
-                      ¥{{ item.transport_cost.toLocaleString() }}
-                    </span>
-                  </div>
-                </div>
+              <div v-if="item.transport_type" class="mt-2 sm:mt-3 text-sm sm:text-base text-gray-600 bg-blue-50 rounded-lg p-3">
+                {{ transportLabel(item.transport_type) }} {{ item.transport_from }} → {{ item.transport_to }}
+                <span v-if="item.transport_duration" class="ml-2">⏱️ {{ item.transport_duration }}分</span>
+                <span v-if="item.transport_cost" class="ml-2 font-semibold">¥{{ item.transport_cost.toLocaleString() }}</span>
               </div>
 
               <!-- Images -->
-              <div v-if="item.images && item.images.length > 0" class="mt-3 flex gap-2 flex-wrap">
+              <div v-if="item.images && item.images.length > 0" class="mt-3 sm:mt-4 flex gap-2 flex-wrap">
                 <img 
                   v-for="image in item.images" 
                   :key="image.id"
                   :src="image.thumbnail_path || image.image_path" 
                   :alt="item.title"
-                  class="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 shadow"
+                  class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-blue-100 cursor-pointer hover:opacity-80"
                 >
               </div>
             </div>
             </div>
           </div>
-          <p v-else class="text-gray-500 text-center py-6">
+          <p v-else class="text-gray-500 text-sm sm:text-base">
             スケジュールが登録されていません。
             <router-link 
               :to="`/plans/${plan.id}/edit`"
