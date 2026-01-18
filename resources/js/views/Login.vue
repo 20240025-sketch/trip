@@ -11,6 +11,11 @@
             新規登録
           </router-link>
         </p>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          <router-link to="/admin-login" class="font-medium text-purple-600 hover:text-purple-500">
+            管理者ログイン
+          </router-link>
+        </p>
       </div>
       
       <form class="mt-8 space-y-6 bg-white rounded-2xl shadow-xl p-8 border-2 border-cyan-100" @submit.prevent="handleLogin">

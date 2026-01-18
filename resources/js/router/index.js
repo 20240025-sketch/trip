@@ -20,6 +20,12 @@ const routes = [
     meta: { guest: true },
   },
   {
+    path: '/admin-login',
+    name: 'adminLogin',
+    component: () => import('@/views/AdminLogin.vue'),
+    meta: { guest: true },
+  },
+  {
     path: '/change-password',
     name: 'changePassword',
     component: () => import('@/views/ChangePassword.vue'),

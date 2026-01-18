@@ -65,12 +65,15 @@ class User extends Authenticatable
 
     /**
      * Check if user is admin
-     * Admin: email does NOT start with a digit (e.g., thjthj@seiei.ac.jp)
+     * Admin: email does NOT start with a digit AND ends with @seiei.ac.jp
      */
     public function isAdmin(): bool
     {
-        // If email starts with a digit, it's a regular user, not admin
-        return preg_match('/^\d/', $this->email) === 0;
+        // Admin conditions:
+        // 1. Email does NOT start with a digit
+        // 2. Email ends with @seiei.ac.jp
+        return preg_match('/^\d/', $this->email) === 0 && 
+               str_ends_with($this->email, '@seiei.ac.jp');
     }
 
     /**

@@ -66,6 +66,11 @@ class Plan extends Model
         return $this->hasMany(PlanAttachment::class)->orderBy('order');
     }
 
+    public function belongings(): HasMany
+    {
+        return $this->hasMany(Belonging::class)->orderBy('order');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

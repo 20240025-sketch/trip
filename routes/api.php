@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BelongingController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\DayController;
 use App\Http\Controllers\Api\ImageController;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 // Auth routes (public)
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('admin-login', [AuthController::class, 'adminLogin']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -54,6 +56,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('checklist-items/{checklistItem}/toggle', [ChecklistItemController::class, 'toggle']);
     Route::apiResource('checklist-items', ChecklistItemController::class)->except(['index', 'store']);
     
+    // Belongings (持ち物)
+    Route::get('plans/{plan}/belongings', [BelongingController::class, 'index']);
+    Route::post('plans/{plan}/belongings', [BelongingController::class, 'store']);
+    Route::put('belongings/{belonging}/toggle', [BelongingController::class, 'toggle']);
+    Route::apiResource('belongings', BelongingController::class)->except(['index', 'store']);
+    
     // Images
     Route::post('images', [ImageController::class, 'upload']);
     Route::post('images/upload', [ImageController::class, 'upload']); // Alias for backwards compatibility
@@ -67,18 +75,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // Plans - show requires auth to check permissions properly
     Route::get('plans/{plan}', [PlanController::class, 'show']);
     Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
-    Route::get('plans', [PlanController::class, 'index']);
+    
+    // PDF - requires auth to check permissions
+    Route::get('plans/{plan}/pdf', [PdfController::class, 'generate']);
+    Route::get('plans/{plan}/pdf/preview', [PdfController::class, 'preview']);
 });
+
+// Plans - index is public but respects auth if provided
+Route::get('plans', [PlanController::class, 'index']);
 
 // Plan Attachments - download is public
 Route::get('plans/{plan}/attachments/{attachment}/download', [PlanAttachmentController::class, 'download']);
 
 // Plans - show by slug is public
 Route::get('plans/slug/{slug}', [PlanController::class, 'showBySlug']);
-
-// PDF - public access
-Route::get('plans/{plan}/pdf', [PdfController::class, 'generate']);
-Route::get('plans/{plan}/pdf/preview', [PdfController::class, 'preview']);
 
 // Q&A - public read, authenticated write
 Route::get('questions', [QuestionController::class, 'index']);

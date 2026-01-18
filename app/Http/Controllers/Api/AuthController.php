@@ -24,11 +24,13 @@ class AuthController extends Controller
             'role' => 'sometimes|in:admin,user',
         ]);
 
-        // 名前が数字で始まる場合は利用者（user）、それ以外は管理者（admin）として登録
-        if (preg_match('/^[0-9]/', $validated['name'])) {
-            $role = 'user';
-        } else {
+        // メールアドレスが数字で始まらず、@seiei.ac.jpで終わる場合は管理者（admin）
+        // それ以外は利用者（user）として登録
+        if (preg_match('/^\d/', $validated['email']) === 0 && 
+            str_ends_with($validated['email'], '@seiei.ac.jp')) {
             $role = 'admin';
+        } else {
+            $role = 'user';
         }
 
         $user = User::create([
@@ -74,6 +76,51 @@ class AuthController extends Controller
                 'token' => $token,
             ],
             'message' => 'ログインしました。'
+        ]);
+    }
+
+    /**
+     * Admin login
+     */
+    public function adminLogin(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'admin_password' => 'required',
+        ]);
+
+        // Check admin password first
+        if ($request->admin_password !== '0835385252') {
+            throw ValidationException::withMessages([
+                'admin_password' => ['管理者パスワードが正しくありません。'],
+            ]);
+        }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            throw ValidationException::withMessages([
+                'email' => ['メールアドレスまたはパスワードが正しくありません。'],
+            ]);
+        }
+
+        $user = User::where('email', $request->email)->firstOrFail();
+
+        // Check if user has admin privileges based on email
+        // Admin: email does NOT start with a digit AND ends with @seiei.ac.jp
+        if (!$user->isAdmin()) {
+            throw ValidationException::withMessages([
+                'email' => ['管理者権限がありません。メールアドレスが条件を満たしていません。'],
+            ]);
+        }
+
+        $token = $user->createToken('admin_auth_token')->plainTextToken;
+
+        return response()->json([
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+            ],
+            'message' => '管理者としてログインしました。'
         ]);
     }
 

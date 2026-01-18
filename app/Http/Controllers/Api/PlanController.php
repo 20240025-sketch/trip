@@ -18,7 +18,29 @@ class PlanController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Plan::with('user');
-        $user = $request->user();
+        
+        // Try to authenticate if token is provided (since this route is public)
+        $user = null;
+        if ($token = $request->bearerToken()) {
+            try {
+                // Manually authenticate using Sanctum
+                $personalAccessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+                if ($personalAccessToken) {
+                    $user = $personalAccessToken->tokenable;
+                }
+            } catch (\Exception $e) {
+                \Log::error('Token authentication failed', ['error' => $e->getMessage()]);
+            }
+        }
+
+        \Log::info('Plans Index Request', [
+            'has_bearer_token' => $request->bearerToken() !== null,
+            'token_length' => $request->bearerToken() ? strlen($request->bearerToken()) : 0,
+            'has_user' => $user !== null,
+            'user_id' => $user?->id,
+            'user_email' => $user?->email,
+            'is_public_filter' => $request->has('is_public') ? $request->boolean('is_public') : 'none',
+        ]);
 
         if ($user) {
             if ($user->isAdmin()) {
@@ -66,16 +88,17 @@ class PlanController extends Controller
             });
         }
 
-        // Filter by public status
+        // Filter by public status - but always show user's own plans
         if ($request->has('is_public')) {
             $isPublic = $request->boolean('is_public');
-            // If filtering for public plans, also include user's own private plans
-            if ($user && $isPublic) {
+            if ($user) {
+                // Authenticated: show filtered plans + user's own plans
                 $query->where(function ($q) use ($user, $isPublic) {
                     $q->where('is_public', $isPublic)
                       ->orWhere('user_id', $user->id);
                 });
             } else {
+                // Not authenticated: only show public plans
                 $query->where('is_public', $isPublic);
             }
         }
@@ -203,8 +226,22 @@ class PlanController extends Controller
             ])
             ->firstOrFail();
 
+        // Try to authenticate if token is provided (since this route is public)
+        $user = null;
+        if ($token = $request->bearerToken()) {
+            try {
+                // Manually authenticate using Sanctum
+                $personalAccessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+                if ($personalAccessToken) {
+                    $user = $personalAccessToken->tokenable;
+                }
+            } catch (\Exception $e) {
+                \Log::error('Token authentication failed in showBySlug', ['error' => $e->getMessage()]);
+            }
+        }
+
         // Check if user can view this plan
-        if (!$plan->canView($request->user())) {
+        if (!$plan->canView($user)) {
             return response()->json([
                 'message' => 'この計画を閲覧する権限がありません。'
             ], 403);

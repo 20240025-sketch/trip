@@ -20,14 +20,18 @@ export const usePlanStore = defineStore('plan', {
       this.loading = true;
       this.error = null;
       try {
+        console.log('fetchPlans called');
+        console.log('Current axios headers before request:', axios.defaults.headers.common);
         const response = await axios.get('/api/plans', {
           params: { page, search },
         });
+        console.log('Plans fetched successfully:', response.data);
         this.plans = response.data.data;
         this.pagination = response.data.meta;
       } catch (error) {
         this.error = 'プランの取得に失敗しました';
-        console.error(error);
+        console.error('fetchPlans error:', error);
+        console.error('Response:', error.response);
       } finally {
         this.loading = false;
       }

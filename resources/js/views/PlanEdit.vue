@@ -25,6 +25,7 @@
       <div class="section-nav">
         <a href="#basic-info" class="nav-item">📝 基本情報</a>
         <a href="#schedule" class="nav-item">📅 スケジュール</a>
+        <a href="#belongings" class="nav-item">🎒 持ち物</a>
         <a href="#images" class="nav-item">📸 画像</a>
         <a href="#attachments" class="nav-item">📎 添付ファイル</a>
       </div>
@@ -264,6 +265,117 @@
         </div>
       </section>
 
+      <!-- Belongings Section -->
+      <section id="belongings" class="content-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">🎒</div>
+            <div class="section-info">
+              <h2 class="section-title">持ち物リスト</h2>
+              <p class="section-description">所持するものと送るものを管理できます</p>
+            </div>
+          </div>
+
+          <div class="belongings-content">
+            <!-- Carry Items (所持するもの) -->
+            <div class="belonging-category">
+              <h3 class="category-title">👜 所持するもの</h3>
+              <div class="belonging-add">
+                <input 
+                  v-model="newCarryItem" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="持ち物を入力..."
+                  @keyup.enter="addBelonging('carry')"
+                >
+                <button 
+                  @click="addBelonging('carry')" 
+                  class="btn btn-sm btn-primary"
+                  :disabled="!newCarryItem.trim()"
+                >
+                  追加
+                </button>
+              </div>
+              <div v-if="carryItems.length > 0" class="belonging-list">
+                <div 
+                  v-for="item in carryItems" 
+                  :key="item.id"
+                  class="belonging-item"
+                >
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      v-model="item.is_checked"
+                      @change="toggleBelonging(item)"
+                      class="checkbox-input"
+                    >
+                    <span :class="{ 'checked-text': item.is_checked }">{{ item.name }}</span>
+                  </label>
+                  <button 
+                    @click="deleteBelonging(item)" 
+                    class="btn-icon btn-danger"
+                    title="削除"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+              <div v-else class="empty-state">
+                <p class="empty-text">所持するものがまだ登録されていません</p>
+              </div>
+            </div>
+
+            <!-- Send Items (送るもの) -->
+            <div class="belonging-category">
+              <h3 class="category-title">📦 送るもの</h3>
+              <div class="belonging-add">
+                <input 
+                  v-model="newSendItem" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="送るものを入力..."
+                  @keyup.enter="addBelonging('send')"
+                >
+                <button 
+                  @click="addBelonging('send')" 
+                  class="btn btn-sm btn-primary"
+                  :disabled="!newSendItem.trim()"
+                >
+                  追加
+                </button>
+              </div>
+              <div v-if="sendItems.length > 0" class="belonging-list">
+                <div 
+                  v-for="item in sendItems" 
+                  :key="item.id"
+                  class="belonging-item"
+                >
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      v-model="item.is_checked"
+                      @change="toggleBelonging(item)"
+                      class="checkbox-input"
+                    >
+                    <span :class="{ 'checked-text': item.is_checked }">{{ item.name }}</span>
+                  </label>
+                  <button 
+                    @click="deleteBelonging(item)" 
+                    class="btn-icon btn-danger"
+                    title="削除"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+              <div v-else class="empty-state">
+                <p class="empty-text">送るものがまだ登録されていません</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Attachments Section -->
       <section id="attachments" class="content-section">
         <div class="section-card">
@@ -308,8 +420,14 @@ const form = ref({
 });
 
 const participants = ref([]);
+const belongings = ref([]);
+const newCarryItem = ref('');
+const newSendItem = ref('');
 
 const error = ref('');
+
+const carryItems = computed(() => belongings.value.filter(b => b.type === 'carry'));
+const sendItems = computed(() => belongings.value.filter(b => b.type === 'send'));
 
 watch(plan, (newPlan) => {
   if (newPlan) {
@@ -478,9 +596,77 @@ const refreshPlan = async () => {
   await planStore.fetchPlan(plan.value.id);
 };
 
+// Belongings functions
+const fetchBelongings = async () => {
+  try {
+    const response = await axios.get(`/api/plans/${plan.value.id}/belongings`);
+    belongings.value = response.data.data;
+  } catch (err) {
+    console.error('Failed to fetch belongings:', err);
+  }
+};
+
+const addBelonging = async (type) => {
+  const itemName = type === 'carry' ? newCarryItem.value : newSendItem.value;
+  
+  if (!itemName.trim()) return;
+  
+  try {
+    const response = await axios.post(`/api/plans/${plan.value.id}/belongings`, {
+      name: itemName,
+      type: type,
+      is_checked: false,
+      order: belongings.value.filter(b => b.type === type).length,
+    });
+    
+    belongings.value.push(response.data.data);
+    
+    if (type === 'carry') {
+      newCarryItem.value = '';
+    } else {
+      newSendItem.value = '';
+    }
+    
+    uiStore.showSuccess('持ち物を追加しました');
+  } catch (err) {
+    console.error('Failed to add belonging:', err);
+    uiStore.showError('持ち物の追加に失敗しました');
+  }
+};
+
+const toggleBelonging = async (item) => {
+  try {
+    await axios.put(`/api/belongings/${item.id}/toggle`);
+  } catch (err) {
+    console.error('Failed to toggle belonging:', err);
+    // Revert the checkbox state
+    item.is_checked = !item.is_checked;
+    uiStore.showError('チェック状態の更新に失敗しました');
+  }
+};
+
+const deleteBelonging = async (item) => {
+  if (!confirm('この持ち物を削除しますか？')) return;
+  
+  try {
+    await axios.delete(`/api/belongings/${item.id}`);
+    belongings.value = belongings.value.filter(b => b.id !== item.id);
+    uiStore.showSuccess('持ち物を削除しました');
+  } catch (err) {
+    console.error('Failed to delete belonging:', err);
+    uiStore.showError('持ち物の削除に失敗しました');
+  }
+};
+
 onMounted(() => {
   planStore.fetchPlan(route.params.id);
 });
+
+watch(plan, (newPlan) => {
+  if (newPlan) {
+    fetchBelongings();
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>
@@ -1138,5 +1324,90 @@ onMounted(() => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Belongings Styles */
+.belongings-content {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .belongings-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.belonging-category {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 2px solid #e2e8f0;
+}
+
+.category-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.belonging-add {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.belonging-add .form-input {
+  flex: 1;
+}
+
+.belonging-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.belonging-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.belonging-item:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.belonging-item .checkbox-label {
+  flex: 1;
+  margin: 0;
+}
+
+.checked-text {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.btn-icon {
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.125rem;
+  transition: transform 0.2s;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.2);
 }
 </style>
