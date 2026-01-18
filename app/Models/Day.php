@@ -28,4 +28,14 @@ class Day extends Model
     {
         return $this->hasMany(ScheduleItem::class)->orderBy('order');
     }
+
+    public function roomAssignments(): HasMany
+    {
+        return $this->hasMany(RoomAssignment::class);
+    }
+
+    public function busAssignments(): HasMany
+    {
+        return $this->hasMany(BusAssignment::class);
+    }
 }

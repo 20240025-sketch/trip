@@ -9,6 +9,7 @@ use App\Http\Resources\PlanResource;
 use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class PlanController extends Controller
 {
@@ -29,11 +30,11 @@ class PlanController extends Controller
                     $user = $personalAccessToken->tokenable;
                 }
             } catch (\Exception $e) {
-                \Log::error('Token authentication failed', ['error' => $e->getMessage()]);
+                Log::error('Token authentication failed', ['error' => $e->getMessage()]);
             }
         }
 
-        \Log::info('Plans Index Request', [
+        Log::info('Plans Index Request', [
             'has_bearer_token' => $request->bearerToken() !== null,
             'token_length' => $request->bearerToken() ? strlen($request->bearerToken()) : 0,
             'has_user' => $user !== null,
@@ -174,7 +175,7 @@ class PlanController extends Controller
         $user = $request->user();
         
         // Log for debugging
-        \Log::info('Plan Show Access Attempt', [
+        Log::info('Plan Show Access Attempt', [
             'plan_id' => $plan->id,
             'plan_user_id' => $plan->user_id,
             'plan_user_id_type' => gettype($plan->user_id),
@@ -190,13 +191,13 @@ class PlanController extends Controller
         $canView = $plan->canView($user);
         $canEdit = $plan->canEdit($user);
         
-        \Log::info('Permission Check Results', [
+        Log::info('Permission Check Results', [
             'can_view' => $canView,
             'can_edit' => $canEdit,
         ]);
         
         if (!$canView && !$canEdit) {
-            \Log::warning('Access Denied', [
+            Log::warning('Access Denied', [
                 'plan_id' => $plan->id,
                 'user_id' => $user?->id,
             ]);
@@ -236,7 +237,7 @@ class PlanController extends Controller
                     $user = $personalAccessToken->tokenable;
                 }
             } catch (\Exception $e) {
-                \Log::error('Token authentication failed in showBySlug', ['error' => $e->getMessage()]);
+                Log::error('Token authentication failed in showBySlug', ['error' => $e->getMessage()]);
             }
         }
 

@@ -42,6 +42,12 @@ const routes = [
     component: () => import('@/pages/AttachmentsPage.vue'),
   },
   {
+    path: '/assignments',
+    name: 'assignments',
+    component: () => import('@/pages/AssignmentsPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/notifications',
     name: 'notifications',
     component: () => import('@/pages/NotificationsPage.vue'),

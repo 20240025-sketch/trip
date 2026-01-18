@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BelongingController;
+use App\Http\Controllers\Api\BusAssignmentController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\DayController;
 use App\Http\Controllers\Api\ImageController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Api\PdfController;
 use App\Http\Controllers\Api\PlanAttachmentController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\QuestionController;
+use App\Http\Controllers\Api\RoomAssignmentController;
 use App\Http\Controllers\Api\ScheduleItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -72,10 +74,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('plans/{plan}/attachments', [PlanAttachmentController::class, 'store']);
     Route::delete('plans/{plan}/attachments/{attachment}', [PlanAttachmentController::class, 'destroy']);
     
-    // Plans - show requires auth to check permissions properly
-    Route::get('plans/{plan}', [PlanController::class, 'show']);
-    Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
-    
     // PDF - requires auth to check permissions
     Route::get('plans/{plan}/pdf', [PdfController::class, 'generate']);
     Route::get('plans/{plan}/pdf/preview', [PdfController::class, 'preview']);
@@ -83,6 +81,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Plans - index is public but respects auth if provided
 Route::get('plans', [PlanController::class, 'index']);
+
+// Plans - show is public but respects auth for permissions
+Route::get('plans/{plan}', [PlanController::class, 'show']);
+Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
+
+// Room Assignments (部屋割) - Public access for viewing plans
+Route::get('days/{day}/room-assignments', [RoomAssignmentController::class, 'index']);
+Route::post('days/{day}/room-assignments', [RoomAssignmentController::class, 'store']);
+Route::put('room-assignments/{roomAssignment}', [RoomAssignmentController::class, 'update']);
+Route::delete('room-assignments/{roomAssignment}', [RoomAssignmentController::class, 'destroy']);
+
+// Bus Assignments (バス座席) - Public access for viewing plans
+Route::get('days/{day}/bus-assignments', [BusAssignmentController::class, 'index']);
+Route::post('days/{day}/bus-assignments', [BusAssignmentController::class, 'store']);
+Route::put('bus-assignments/{busAssignment}', [BusAssignmentController::class, 'update']);
+Route::delete('bus-assignments/{busAssignment}', [BusAssignmentController::class, 'destroy']);
 
 // Plan Attachments - download is public
 Route::get('plans/{plan}/attachments/{attachment}/download', [PlanAttachmentController::class, 'download']);

@@ -71,6 +71,16 @@ class Plan extends Model
         return $this->hasMany(Belonging::class)->orderBy('order');
     }
 
+    public function roomAssignments(): HasMany
+    {
+        return $this->hasMany(RoomAssignment::class);
+    }
+
+    public function busAssignments(): HasMany
+    {
+        return $this->hasMany(BusAssignment::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
