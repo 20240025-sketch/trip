@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\PlanAttachment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -17,33 +18,65 @@ class PlanAttachmentController extends Controller
      */
     public function index(Request $request, string $planId): JsonResponse
     {
-        $plan = Plan::findOrFail($planId);
-        
-        $user = $request->user();
-        
-        // Check if user can view this plan
-        if (!$plan->canView($user) && !$plan->canEdit($user)) {
+        try {
+            $plan = Plan::findOrFail($planId);
+            
+            $user = $request->user();
+            
+            // Log for debugging
+            Log::info('Attachment Index Request', [
+                'plan_id' => $planId,
+                'plan_is_public' => $plan->is_public,
+                'has_user' => $user !== null,
+                'user_id' => $user?->id ?? 'none',
+            ]);
+            
+            // Check if user can view this plan
+            $canView = $plan->canView($user);
+            
+            Log::info('Attachment canView result', [
+                'can_view' => $canView,
+                'plan_user_id' => $plan->user_id,
+            ]);
+            
+            if (!$canView) {
+                Log::warning('Attachment access denied', [
+                    'plan_id' => $planId,
+                    'user_id' => $user?->id ?? 'none',
+                    'plan_is_public' => $plan->is_public,
+                ]);
+                
+                return response()->json([
+                    'message' => 'この旅行計画を閲覧する権限がありません。'
+                ], 403);
+            }
+
+            $attachments = $plan->attachments()->get()->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'original_name' => $attachment->original_name,
+                    'mime_type' => $attachment->mime_type,
+                    'file_size' => $attachment->file_size,
+                    'formatted_size' => $attachment->getFormattedSize(),
+                    'url' => $attachment->getUrl(),
+                    'is_image' => $attachment->isImage(),
+                    'is_pdf' => $attachment->isPdf(),
+                    'extension' => $attachment->getExtension(),
+                    'created_at' => $attachment->created_at->toISOString(),
+                ];
+            });
+
+            return response()->json($attachments);
+        } catch (\Exception $e) {
+            Log::error('Attachment index error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             return response()->json([
-                'message' => 'この旅行計画を閲覧する権限がありません。'
-            ], 403);
+                'message' => 'エラーが発生しました: ' . $e->getMessage()
+            ], 500);
         }
-
-        $attachments = $plan->attachments()->get()->map(function ($attachment) {
-            return [
-                'id' => $attachment->id,
-                'original_name' => $attachment->original_name,
-                'mime_type' => $attachment->mime_type,
-                'file_size' => $attachment->file_size,
-                'formatted_size' => $attachment->getFormattedSize(),
-                'url' => $attachment->getUrl(),
-                'is_image' => $attachment->isImage(),
-                'is_pdf' => $attachment->isPdf(),
-                'extension' => $attachment->getExtension(),
-                'created_at' => $attachment->created_at->toISOString(),
-            ];
-        });
-
-        return response()->json($attachments);
     }
 
     /**

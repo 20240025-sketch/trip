@@ -11,6 +11,24 @@ if (token) {
     window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 }
 
+// リクエストインターセプター：すべてのリクエストに認証トークンを追加
+window.axios.interceptors.request.use(
+    config => {
+        const authToken = localStorage.getItem('token');
+        console.log('Request interceptor - Token from localStorage:', authToken ? `${authToken.substring(0, 10)}...` : 'none');
+        if (authToken) {
+            config.headers.Authorization = `Bearer ${authToken}`;
+            console.log('Request interceptor - Authorization header set:', config.headers.Authorization ? 'yes' : 'no');
+        }
+        console.log('Request URL:', config.url);
+        console.log('Request headers:', config.headers);
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
 // エラーハンドリング
 window.axios.interceptors.response.use(
     response => response,

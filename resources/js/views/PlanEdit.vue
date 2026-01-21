@@ -454,7 +454,7 @@ watch(plan, (newPlan) => {
       updateParticipantsArray();
     }
   }
-});
+}, { immediate: true });
 
 const updateParticipantsArray = () => {
   const count = form.value.participant_count || 0;
@@ -658,8 +658,12 @@ const deleteBelonging = async (item) => {
   }
 };
 
-onMounted(() => {
-  planStore.fetchPlan(route.params.id);
+onMounted(async () => {
+  // currentPlanが既にある場合（作成直後など）は再フェッチしない
+  // ただしIDが一致するか確認
+  if (!planStore.currentPlan || planStore.currentPlan.id !== parseInt(route.params.id)) {
+    await planStore.fetchPlan(route.params.id);
+  }
 });
 
 watch(plan, (newPlan) => {

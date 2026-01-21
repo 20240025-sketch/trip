@@ -177,6 +177,8 @@ const handleSubmit = async () => {
   
   try {
     const plan = await planStore.createPlan(form.value);
+    // 作成したプランの情報をストアに保存
+    planStore.setCurrentPlan(plan);
     uiStore.showSuccess('プランを作成しました。続けてスケジュールを追加しましょう！');
     // 作成後すぐに編集画面へ遷移してスケジュールを追加できるようにする
     router.push(`/plans/${plan.id}/edit`);

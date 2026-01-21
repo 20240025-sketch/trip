@@ -29,6 +29,13 @@
             </button>
             <router-link 
               v-if="canEdit"
+              :to="`/plans/${plan.id}/participants`" 
+              class="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap text-sm sm:text-base"
+            >
+              👥 参加者管理
+            </router-link>
+            <router-link 
+              v-if="canEdit"
               :to="`/plans/${plan.id}/edit`" 
               class="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 whitespace-nowrap text-sm sm:text-base"
             >
@@ -111,7 +118,7 @@
                 <img 
                   v-for="image in item.images" 
                   :key="image.id"
-                  :src="image.thumbnail_path || image.image_path" 
+                  :src="`/storage/${image.thumbnail_path || image.path}`" 
                   :alt="item.title"
                   class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-blue-100 cursor-pointer hover:opacity-80"
                 >
@@ -188,17 +195,31 @@
     </div>
 
     <!-- Images -->
-    <div v-if="plan.images && plan.images.length > 0" class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-lg shadow-md p-4 sm:p-6">
-      <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">画像 ({{ plan.images.length }}枚)</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+    <div class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-purple-100">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+          <span>📸</span>
+          <span>画像</span>
+          <span v-if="plan.images && plan.images.length > 0" class="text-base text-gray-500">({{ plan.images.length }}枚)</span>
+        </h2>
+      </div>
+
+      <div v-if="plan.images && plan.images.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         <div v-for="image in plan.images" :key="image.id" class="relative group">
           <img 
-            :src="`/storage/${image.thumbnail_path || image.image_path}`"
+            :src="`/storage/${image.thumbnail_path || image.path}`"
             :alt="image.original_name || 'Image'"
-            class="w-full h-24 sm:h-32 object-cover rounded-lg cursor-pointer shadow hover:shadow-lg transition-shadow"
+            class="w-full h-28 sm:h-36 object-cover rounded-xl cursor-pointer shadow-md hover:shadow-xl transition-all hover:scale-105"
             @click="viewImage(image)"
           >
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-xl"></div>
         </div>
+      </div>
+      
+      <div v-else class="text-center py-12 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-dashed border-purple-200">
+        <div class="text-5xl sm:text-6xl mb-4">📷</div>
+        <p class="text-gray-600 font-medium text-base sm:text-lg mb-2">画像がまだ追加されていません</p>
+        <p class="text-gray-500 text-sm sm:text-base">編集画面から画像をアップロードできます</p>
       </div>
     </div>
 

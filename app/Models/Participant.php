@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Participant extends Model
 {
     protected $fillable = [
         'plan_id',
         'name',
+        'email',
         'class_name',
         'contact',
         'avatar',
@@ -21,13 +22,13 @@ class Participant extends Model
         return $this->belongsTo(Plan::class);
     }
 
-    public function roomAssignment(): HasOne
+    public function roomAssignments(): HasMany
     {
-        return $this->hasOne(RoomAssignment::class);
+        return $this->hasMany(RoomAssignment::class);
     }
 
-    public function busAssignment(): HasOne
+    public function busAssignments(): HasMany
     {
-        return $this->hasOne(BusAssignment::class);
+        return $this->hasMany(BusAssignment::class);
     }
 }

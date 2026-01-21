@@ -9,10 +9,10 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
 
-// Initialize auth store
+// Initialize auth store BEFORE router to ensure tokens are set
 const authStore = useAuthStore();
 authStore.initAuth();
 
+app.use(router);
 app.mount('#app');

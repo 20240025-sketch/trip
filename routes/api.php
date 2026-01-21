@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\DayController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ParticipantController;
+use App\Http\Controllers\Api\ParticipantAssignmentController;
 use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\PdfController;
 use App\Http\Controllers\Api\PlanAttachmentController;
@@ -51,6 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('plans/{plan}/participants', [ParticipantController::class, 'index']);
     Route::post('plans/{plan}/participants', [ParticipantController::class, 'store']);
     Route::apiResource('participants', ParticipantController::class)->except(['index', 'store']);
+    
+    // Participant Assignment Management (一括管理)
+    Route::get('plans/{plan}/participant-assignments', [ParticipantAssignmentController::class, 'index']);
+    Route::post('plans/{plan}/participant-assignments/bulk', [ParticipantAssignmentController::class, 'bulkStore']);
+    Route::put('participant-assignments/{participant}', [ParticipantAssignmentController::class, 'update']);
     
     // Checklist Items
     Route::get('plans/{plan}/checklist-items', [ChecklistItemController::class, 'index']);

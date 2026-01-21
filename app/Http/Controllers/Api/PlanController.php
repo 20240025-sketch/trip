@@ -18,7 +18,7 @@ class PlanController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Plan::with('user');
+        $query = Plan::with(['user', 'images']);
         
         // Try to authenticate if token is provided (since this route is public)
         $user = null;

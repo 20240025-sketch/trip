@@ -44,7 +44,7 @@ const routes = [
   {
     path: '/assignments',
     name: 'assignments',
-    component: () => import('@/pages/AssignmentsPage.vue'),
+    component: () => import('@/pages/AssignmentTablePage.vue'),
     meta: { requiresAuth: true },
   },
   {
@@ -72,6 +72,12 @@ const routes = [
     path: '/plans/:id/edit',
     name: 'plans.edit',
     component: () => import('@/views/PlanEdit.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/plans/:id/participants',
+    name: 'plans.participants',
+    component: () => import('@/pages/ParticipantManagementPage.vue'),
     meta: { requiresAuth: true },
   },
   {

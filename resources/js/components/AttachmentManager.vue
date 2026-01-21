@@ -112,10 +112,15 @@ const fileInput = ref(null);
 const fetchAttachments = async () => {
   loading.value = true;
   try {
+    console.log('Fetching attachments for plan:', props.planId);
+    console.log('Current Authorization header:', axios.defaults.headers.common['Authorization']);
+    
     const response = await axios.get(`/api/plans/${props.planId}/attachments`);
     attachments.value = response.data;
+    console.log('Attachments loaded:', attachments.value.length);
   } catch (error) {
     console.error('添付ファイルの取得に失敗しました:', error);
+    console.error('Error response:', error.response);
     uiStore.showError('添付ファイルの読み込みに失敗しました');
   } finally {
     loading.value = false;

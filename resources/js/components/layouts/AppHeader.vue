@@ -65,7 +65,7 @@
             class="px-4 py-2.5 text-gray-700 hover:text-green-600 font-semibold rounded-full hover:bg-green-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
             <span class="text-xl">🚌🏠</span>
-            <span>バス・部屋割</span>
+            <span>部屋割・バス</span>
           </router-link>
           <router-link 
             to="/plans" 
@@ -210,7 +210,7 @@
               class="px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 font-semibold rounded-lg transition-all flex items-center gap-3"
             >
               <span class="text-xl">🚌🏠</span>
-              <span>バス・部屋割</span>
+              <span>部屋割・バス</span>
             </router-link>
             <router-link 
               @click="closeMobileMenu"

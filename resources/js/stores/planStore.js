@@ -41,11 +41,16 @@ export const usePlanStore = defineStore('plan', {
       this.loading = true;
       this.error = null;
       try {
+        console.log('fetchPlan called for ID:', id);
+        console.log('Current Authorization header:', axios.defaults.headers.common['Authorization']);
+        
         const response = await axios.get(`/api/plans/${id}`);
         this.currentPlan = response.data.data;
+        console.log('Plan fetched successfully:', this.currentPlan.id);
       } catch (error) {
         this.error = 'プランの取得に失敗しました';
-        console.error(error);
+        console.error('fetchPlan error:', error);
+        console.error('Error response:', error.response);
       } finally {
         this.loading = false;
       }

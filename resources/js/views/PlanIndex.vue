@@ -17,6 +17,17 @@
             <span class="text-sm sm:text-base">新しい旅を計画</span>
           </router-link>
         </div>
+
+        <!-- Folder Management -->
+        <div class="mb-4 flex gap-3">
+          <button 
+            @click="showFolderModal = true"
+            class="px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2"
+          >
+            <span>📁</span>
+            <span>フォルダを作成</span>
+          </button>
+        </div>
         
         <!-- Search -->
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -52,6 +63,117 @@
 
       <!-- Plans Grid -->
       <div v-else>
+        <!-- Folders Section -->
+        <div v-if="folders.length > 0" class="mb-8">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>📁</span>
+            <span>フォルダ</span>
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+            <div 
+              v-for="folder in folders" 
+              :key="folder.id"
+              @click="toggleFolder(folder.id)"
+              class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-200 hover:border-amber-400 cursor-pointer hover:shadow-lg transition-all group"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <span class="text-4xl">{{ folder.expanded ? '📂' : '📁' }}</span>
+                  <div>
+                    <h3 class="font-bold text-gray-800 group-hover:text-amber-600 text-lg">
+                      {{ folder.name }}
+                    </h3>
+                    <p class="text-sm text-gray-600">{{ getFolderPlanCount(folder.id) }}件のプラン</p>
+                  </div>
+                </div>
+                <button 
+                  @click.stop="deleteFolder(folder.id)"
+                  class="text-gray-400 hover:text-red-600 transition-colors"
+                  title="フォルダを削除"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expanded Folder Plans -->
+          <div v-for="folder in folders.filter(f => f.expanded)" :key="'expanded-' + folder.id" class="mb-8">
+            <h3 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+              <span>📂</span>
+              <span>{{ folder.name }} のプラン</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div 
+                v-for="plan in getPlansInFolder(folder.id)" 
+                :key="plan.id"
+                class="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-amber-200"
+              >
+                <!-- Plan Card Content (same as before) -->
+                <div 
+                  class="h-40 sm:h-48 bg-gradient-to-r from-amber-200 via-orange-200 to-yellow-200 relative overflow-hidden"
+                  :style="getPlanCoverImage(plan) ? `background-image: url(${getPlanCoverImage(plan)}); background-size: cover; background-position: center;` : ''"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:from-black/50 transition-all duration-300"></div>
+                  <button 
+                    @click.stop="removePlanFromFolder(plan.id, folder.id)"
+                    class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold hover:bg-red-600 transition-colors"
+                  >
+                    フォルダから削除
+                  </button>
+                  <div v-if="plan.is_public" class="absolute top-3 right-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                    <span>✓</span>
+                    <span>公開中</span>
+                  </div>
+                  <div v-else class="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                    <span>🔒</span>
+                    <span>非公開</span>
+                  </div>
+                </div>
+                
+                <div class="p-4 sm:p-6">
+                  <h3 class="text-lg sm:text-xl font-bold mb-2 text-gray-800 group-hover:text-amber-600 transition-colors line-clamp-1">
+                    {{ plan.title }}
+                  </h3>
+                  <p class="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                    {{ plan.description || '楽しい旅行の計画です✨' }}
+                  </p>
+                  <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                    <span class="text-lg">📅</span>
+                    <span>{{ formatDateRange(plan.start_date, plan.end_date) }}</span>
+                  </div>
+                  
+                  <div class="flex gap-2">
+                    <router-link 
+                      :to="`/plans/${plan.id}`"
+                      @click="handlePlanClick(plan)"
+                      class="flex-1 text-center px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 text-sm"
+                    >
+                      詳細を見る
+                    </router-link>
+                    <router-link 
+                      v-if="plan.can_edit"
+                      :to="`/plans/${plan.id}/edit`"
+                      @click="handlePlanClick(plan)"
+                      class="px-3 py-2 bg-amber-50 text-amber-700 font-bold rounded-full hover:bg-amber-100 hover:scale-105 transition-all duration-300"
+                    >
+                      ✏️
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uncategorized Plans -->
+        <div v-if="getUncategorizedPlans().length > 0">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>📋</span>
+            <span>{{ folders.length > 0 ? '未分類のプラン' : 'すべてのプラン' }}</span>
+          </h2>
+        </div>
+
         <div v-if="planStore.plans.length === 0" class="text-center py-16 sm:py-20 bg-white rounded-2xl sm:rounded-3xl shadow-lg border-2 border-cyan-100">
           <div class="text-6xl sm:text-8xl mb-6">📝</div>
           <p class="text-gray-500 text-xl sm:text-2xl mb-6 sm:mb-8">まだプランがありません</p>
@@ -66,16 +188,31 @@
         <div v-else>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
             <div 
-              v-for="plan in planStore.plans" 
+              v-for="plan in getUncategorizedPlans()" 
               :key="plan.id"
               class="group bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-cyan-100"
             >
               <!-- Image -->
               <div 
                 class="h-40 sm:h-48 lg:h-56 bg-gradient-to-r from-cyan-200 via-blue-200 to-sky-200 relative overflow-hidden"
-                :style="plan.cover_image ? `background-image: url(${plan.cover_image}); background-size: cover; background-position: center;` : ''"
+                :style="getPlanCoverImage(plan) ? `background-image: url(${getPlanCoverImage(plan)}); background-size: cover; background-position: center;` : ''"
               >
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:from-black/50 transition-all duration-300"></div>
+                
+                <!-- Add to Folder Button -->
+                <div v-if="folders.length > 0" class="absolute top-3 left-3">
+                  <select 
+                    @change="addPlanToFolder(plan.id, $event.target.value); $event.target.value = ''"
+                    class="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1.5 rounded-full text-xs font-bold cursor-pointer hover:bg-white transition-colors"
+                    @click.stop
+                  >
+                    <option value="">フォルダに追加</option>
+                    <option v-for="folder in folders" :key="folder.id" :value="folder.id">
+                      📁 {{ folder.name }}
+                    </option>
+                  </select>
+                </div>
+
                 <div v-if="plan.is_public" class="absolute top-3 sm:top-4 right-3 sm:right-4 bg-green-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 shadow-lg">
                   <span>✓</span>
                   <span>公開中</span>
@@ -140,6 +277,34 @@
         </div>
       </div>
     </div>
+
+    <!-- Folder Creation Modal -->
+    <div v-if="showFolderModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click="showFolderModal = false">
+      <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl" @click.stop>
+        <h3 class="text-2xl font-bold mb-4 text-gray-800">📁 新しいフォルダ</h3>
+        <input 
+          v-model="newFolderName"
+          type="text"
+          placeholder="フォルダ名を入力"
+          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent mb-4"
+          @keyup.enter="createFolder"
+        />
+        <div class="flex gap-3">
+          <button 
+            @click="showFolderModal = false"
+            class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+          >
+            キャンセル
+          </button>
+          <button 
+            @click="createFolder"
+            class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-semibold"
+          >
+            作成
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -149,6 +314,117 @@ import { usePlanStore } from '@/stores/planStore';
 
 const planStore = usePlanStore();
 const searchQuery = ref('');
+const folders = ref([]);
+const showFolderModal = ref(false);
+const newFolderName = ref('');
+const planFolders = ref({}); // { planId: folderId }
+
+// Load folders from localStorage
+const loadFolders = () => {
+  const saved = localStorage.getItem('planFolders');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      folders.value = data.folders || [];
+      planFolders.value = data.planFolders || {};
+    } catch (error) {
+      console.error('Failed to load folders:', error);
+    }
+  }
+};
+
+// Save folders to localStorage
+const saveFolders = () => {
+  localStorage.setItem('planFolders', JSON.stringify({
+    folders: folders.value,
+    planFolders: planFolders.value
+  }));
+};
+
+// Create new folder
+const createFolder = () => {
+  if (!newFolderName.value.trim()) {
+    alert('フォルダ名を入力してください');
+    return;
+  }
+  
+  folders.value.push({
+    id: Date.now(),
+    name: newFolderName.value.trim(),
+    expanded: false
+  });
+  
+  saveFolders();
+  newFolderName.value = '';
+  showFolderModal.value = false;
+};
+
+// Delete folder
+const deleteFolder = (folderId) => {
+  if (!confirm('このフォルダを削除しますか？（プランは削除されません）')) {
+    return;
+  }
+  
+  folders.value = folders.value.filter(f => f.id !== folderId);
+  
+  // Remove plans from this folder
+  Object.keys(planFolders.value).forEach(planId => {
+    if (planFolders.value[planId] === folderId) {
+      delete planFolders.value[planId];
+    }
+  });
+  
+  saveFolders();
+};
+
+// Toggle folder expansion
+const toggleFolder = (folderId) => {
+  const folder = folders.value.find(f => f.id === folderId);
+  if (folder) {
+    folder.expanded = !folder.expanded;
+    saveFolders();
+  }
+};
+
+// Add plan to folder
+const addPlanToFolder = (planId, folderId) => {
+  if (!folderId) return;
+  
+  planFolders.value[planId] = parseInt(folderId);
+  saveFolders();
+};
+
+// Remove plan from folder
+const removePlanFromFolder = (planId, folderId) => {
+  delete planFolders.value[planId];
+  saveFolders();
+};
+
+// Get plans in a folder
+const getPlansInFolder = (folderId) => {
+  return planStore.plans.filter(plan => planFolders.value[plan.id] === folderId);
+};
+
+// Get uncategorized plans
+const getUncategorizedPlans = () => {
+  return planStore.plans.filter(plan => !planFolders.value[plan.id]);
+};
+
+// Get folder plan count
+const getFolderPlanCount = (folderId) => {
+  return getPlansInFolder(folderId).length;
+};
+
+// Get plan cover image
+const getPlanCoverImage = (plan) => {
+  // プランに画像がある場合、最初の画像を使用
+  if (plan.images && plan.images.length > 0) {
+    const firstImage = plan.images[0];
+    // ストレージパスを生成
+    return `/storage/${firstImage.path}`;
+  }
+  return null;
+};
 
 const formatDateRange = (startDate, endDate) => {
   const start = new Date(startDate);
@@ -176,5 +452,6 @@ const handlePlanClick = (plan) => {
 
 onMounted(() => {
   planStore.fetchPlans();
+  loadFolders();
 });
 </script>
