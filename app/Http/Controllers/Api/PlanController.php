@@ -9,6 +9,7 @@ use App\Http\Resources\PlanResource;
 use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PlanController extends Controller
@@ -172,7 +173,8 @@ class PlanController extends Controller
             'user'
         ])->findOrFail($id);
 
-        $user = $request->user();
+        // Sanctumガードを使用して認証ユーザーを取得
+        $user = Auth::guard('sanctum')->user();
         
         // Log for debugging
         Log::info('Plan Show Access Attempt', [
@@ -185,6 +187,10 @@ class PlanController extends Controller
             'is_public' => $plan->is_public,
             'user_exists' => $user !== null,
             'ids_match' => $user && ((int)$plan->user_id === (int)$user->id),
+            'has_bearer_token' => $request->hasHeader('Authorization'),
+            'bearer_token_preview' => $request->hasHeader('Authorization') 
+                ? substr($request->header('Authorization'), 0, 20) . '...' 
+                : 'none',
         ]);
         
         // Check if user can view this plan

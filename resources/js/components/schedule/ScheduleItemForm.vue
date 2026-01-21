@@ -236,20 +236,24 @@ const handleSubmit = () => {
   
   emit('submit', data);
   
-  // Reset form if adding new item
-  if (!props.isEdit) {
-    form.value = {
-      time: '',
-      title: '',
-      description: '',
-      location: '',
-      transport_type: '',
-      transport_from: '',
-      transport_to: '',
-      transport_duration: null,
-      transport_cost: null,
-    };
-    showTransport.value = false;
-  }
+  // フォームの内容を保持する（リセットしない）
+  // ユーザーが次のスケジュールを追加しやすいように、入力内容をそのまま残す
+  // 必要に応じて手動でクリアできる
+  
+  // 以前のコード（フォームをリセットしていた）:
+  // if (!props.isEdit) {
+  //   form.value = {
+  //     time: '',
+  //     title: '',
+  //     description: '',
+  //     location: '',
+  //     transport_type: '',
+  //     transport_from: '',
+  //     transport_to: '',
+  //     transport_duration: null,
+  //     transport_cost: null,
+  //   };
+  //   showTransport.value = false;
+  // }
 };
 </script>

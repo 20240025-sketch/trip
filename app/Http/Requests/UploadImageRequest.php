@@ -30,6 +30,24 @@ class UploadImageRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Convert short type names to full class names
+        $typeMap = [
+            'plan' => 'App\\Models\\Plan',
+            'schedule_item' => 'App\\Models\\ScheduleItem',
+        ];
+
+        if ($this->has('imageable_type') && isset($typeMap[$this->imageable_type])) {
+            $this->merge([
+                'imageable_type' => $typeMap[$this->imageable_type],
+            ]);
+        }
+    }
+
+    /**
      * Get custom messages for validator errors.
      */
     public function messages(): array

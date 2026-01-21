@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\PlanAttachment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -21,7 +22,8 @@ class PlanAttachmentController extends Controller
         try {
             $plan = Plan::findOrFail($planId);
             
-            $user = $request->user();
+            // Sanctumガードを使用して認証ユーザーを取得
+            $user = Auth::guard('sanctum')->user();
             
             // Log for debugging
             Log::info('Attachment Index Request', [
@@ -29,6 +31,10 @@ class PlanAttachmentController extends Controller
                 'plan_is_public' => $plan->is_public,
                 'has_user' => $user !== null,
                 'user_id' => $user?->id ?? 'none',
+                'has_bearer_token' => $request->hasHeader('Authorization'),
+                'bearer_token_preview' => $request->hasHeader('Authorization') 
+                    ? substr($request->header('Authorization'), 0, 20) . '...' 
+                    : 'none',
             ]);
             
             // Check if user can view this plan

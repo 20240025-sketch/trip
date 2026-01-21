@@ -373,6 +373,16 @@ const toggleChecklistItem = async (itemId) => {
 onMounted(async () => {
   const planId = route.params.id;
   
+  console.log('PlanShow mounted - route.params:', route.params);
+  console.log('PlanShow mounted - planId:', planId);
+  
+  if (!planId) {
+    console.error('No plan ID in route params');
+    uiStore.showError('プランIDが見つかりません');
+    router.push({ name: 'plans' });
+    return;
+  }
+  
   // If plan is already loaded and matches the route, skip fetching
   if (plan.value && plan.value.id == planId) {
     console.log('Plan already loaded, skipping fetch');

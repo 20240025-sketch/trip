@@ -36,6 +36,7 @@
               <tr class="bg-gradient-to-r from-blue-50 to-cyan-50 border-b-2 border-blue-200">
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">メールアドレス</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">名前</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">クラス</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">部屋割</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">座席</th>
                 <th v-if="isAdmin" class="px-6 py-4 text-center text-sm font-semibold text-gray-700">操作</th>
@@ -78,6 +79,18 @@
                     placeholder="ふりがな"
                     :disabled="!isAdmin"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md text-xs text-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="{ 'bg-gray-100 cursor-not-allowed': !isAdmin }"
+                  />
+                </td>
+                
+                <!-- Class -->
+                <td class="px-6 py-4">
+                  <input 
+                    v-model="participant.class_name"
+                    type="text"
+                    placeholder="1年A組"
+                    :disabled="!isAdmin"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     :class="{ 'bg-gray-100 cursor-not-allowed': !isAdmin }"
                   />
                 </td>
@@ -197,6 +210,7 @@ const addParticipant = () => {
       email: '',
       name: '',
       furigana: '',
+      class_name: '',
       room_day1: '',
       room_day2: '',
       room_day3: '',
@@ -219,6 +233,7 @@ const addParticipant = () => {
     email: authStore.user.email,
     name: authStore.user.name || '',
     furigana: '',
+    class_name: '',
     room_day1: '',
     room_day2: '',
     room_day3: '',
