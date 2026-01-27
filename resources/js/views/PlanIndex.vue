@@ -82,17 +82,29 @@
                   <div>
                     <h3 class="font-bold text-gray-800 group-hover:text-amber-600 text-lg">
                       {{ folder.name }}
+                      <span v-if="folder.is_private" class="ml-2 text-sm bg-gray-600 text-white px-2 py-0.5 rounded-full">🔒 作成者のみ</span>
                     </h3>
-                    <p class="text-sm text-gray-600">{{ getFolderPlanCount(folder.id) }}件のプラン</p>
+                    <p class="text-sm text-gray-600">{{ folder.plan_count }}件のプラン</p>
                   </div>
                 </div>
-                <button 
-                  @click.stop="deleteFolder(folder.id)"
-                  class="text-gray-400 hover:text-red-600 transition-colors"
-                  title="フォルダを削除"
-                >
-                  🗑️
-                </button>
+                <div class="flex gap-2">
+                  <button 
+                    v-if="folder.is_owner"
+                    @click.stop="toggleFolderPrivacy(folder)"
+                    class="text-gray-400 hover:text-blue-600 transition-colors"
+                    :title="folder.is_private ? '公開フォルダにする' : 'プライベートフォルダにする'"
+                  >
+                    {{ folder.is_private ? '🔒' : '🌐' }}
+                  </button>
+                  <button 
+                    v-if="folder.is_owner"
+                    @click.stop="deleteFolder(folder.id)"
+                    class="text-gray-400 hover:text-red-600 transition-colors"
+                    title="フォルダを削除"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -289,6 +301,17 @@
           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent mb-4"
           @keyup.enter="createFolder"
         />
+        <div class="mb-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input 
+              v-model="newFolderIsPrivate"
+              type="checkbox"
+              class="w-5 h-5 text-amber-500 rounded focus:ring-2 focus:ring-amber-500"
+            />
+            <span class="text-gray-700">🔒 作成者のみに表示（プライベートフォルダ）</span>
+          </label>
+          <p class="text-sm text-gray-500 mt-1 ml-7">チェックを入れると、フォルダの作成者のみがこのフォルダを閲覧できます</p>
+        </div>
         <div class="flex gap-3">
           <button 
             @click="showFolderModal = false"
@@ -311,108 +334,148 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { usePlanStore } from '@/stores/planStore';
+import axios from 'axios';
 
 const planStore = usePlanStore();
 const searchQuery = ref('');
 const folders = ref([]);
 const showFolderModal = ref(false);
 const newFolderName = ref('');
-const planFolders = ref({}); // { planId: folderId }
+const newFolderIsPrivate = ref(false);
 
-// Load folders from localStorage
-const loadFolders = () => {
-  const saved = localStorage.getItem('planFolders');
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      folders.value = data.folders || [];
-      planFolders.value = data.planFolders || {};
-    } catch (error) {
-      console.error('Failed to load folders:', error);
-    }
+// Load folders from API
+const loadFolders = async () => {
+  try {
+    const response = await axios.get('/api/folders');
+    folders.value = response.data.map(folder => ({
+      ...folder,
+      expanded: false
+    }));
+  } catch (error) {
+    console.error('Failed to load folders:', error);
   }
 };
 
-// Save folders to localStorage
-const saveFolders = () => {
-  localStorage.setItem('planFolders', JSON.stringify({
-    folders: folders.value,
-    planFolders: planFolders.value
-  }));
-};
-
 // Create new folder
-const createFolder = () => {
+const createFolder = async () => {
   if (!newFolderName.value.trim()) {
     alert('フォルダ名を入力してください');
     return;
   }
   
-  folders.value.push({
-    id: Date.now(),
-    name: newFolderName.value.trim(),
-    expanded: false
-  });
-  
-  saveFolders();
-  newFolderName.value = '';
-  showFolderModal.value = false;
+  try {
+    const response = await axios.post('/api/folders', {
+      name: newFolderName.value.trim(),
+      is_private: newFolderIsPrivate.value
+    });
+    
+    folders.value.push({
+      ...response.data,
+      expanded: false
+    });
+    
+    newFolderName.value = '';
+    newFolderIsPrivate.value = false;
+    showFolderModal.value = false;
+  } catch (error) {
+    console.error('Failed to create folder:', error);
+    alert('フォルダの作成に失敗しました');
+  }
+};
+
+// Toggle folder privacy
+const toggleFolderPrivacy = async (folder) => {
+  try {
+    const response = await axios.put(`/api/folders/${folder.id}`, {
+      is_private: !folder.is_private
+    });
+    
+    folder.is_private = response.data.is_private;
+  } catch (error) {
+    console.error('Failed to update folder:', error);
+    alert('フォルダの更新に失敗しました');
+  }
 };
 
 // Delete folder
-const deleteFolder = (folderId) => {
+const deleteFolder = async (folderId) => {
   if (!confirm('このフォルダを削除しますか？（プランは削除されません）')) {
     return;
   }
   
-  folders.value = folders.value.filter(f => f.id !== folderId);
-  
-  // Remove plans from this folder
-  Object.keys(planFolders.value).forEach(planId => {
-    if (planFolders.value[planId] === folderId) {
-      delete planFolders.value[planId];
-    }
-  });
-  
-  saveFolders();
+  try {
+    await axios.delete(`/api/folders/${folderId}`);
+    folders.value = folders.value.filter(f => f.id !== folderId);
+  } catch (error) {
+    console.error('Failed to delete folder:', error);
+    alert('フォルダの削除に失敗しました');
+  }
 };
 
 // Toggle folder expansion
-const toggleFolder = (folderId) => {
+const toggleFolder = async (folderId) => {
   const folder = folders.value.find(f => f.id === folderId);
   if (folder) {
     folder.expanded = !folder.expanded;
-    saveFolders();
+    
+    // Load plans if expanding
+    if (folder.expanded && !folder.plans) {
+      try {
+        const response = await axios.get(`/api/folders/${folderId}`);
+        folder.plans = response.data.plans;
+      } catch (error) {
+        console.error('Failed to load folder plans:', error);
+      }
+    }
   }
 };
 
 // Add plan to folder
-const addPlanToFolder = (planId, folderId) => {
+const addPlanToFolder = async (planId, folderId) => {
   if (!folderId) return;
   
-  planFolders.value[planId] = parseInt(folderId);
-  saveFolders();
+  try {
+    await axios.post(`/api/folders/${folderId}/plans`, {
+      plan_id: planId
+    });
+    
+    // Reload folders
+    await loadFolders();
+  } catch (error) {
+    console.error('Failed to add plan to folder:', error);
+    alert('プランをフォルダに追加できませんでした');
+  }
 };
 
 // Remove plan from folder
-const removePlanFromFolder = (planId, folderId) => {
-  delete planFolders.value[planId];
-  saveFolders();
+const removePlanFromFolder = async (planId, folderId) => {
+  try {
+    await axios.delete(`/api/folders/${folderId}/plans/${planId}`);
+    
+    // Reload folders
+    await loadFolders();
+  } catch (error) {
+    console.error('Failed to remove plan from folder:', error);
+    alert('フォルダからプランを削除できませんでした');
+  }
 };
 
 // Get plans in a folder
 const getPlansInFolder = (folderId) => {
-  return planStore.plans.filter(plan => planFolders.value[plan.id] === folderId);
+  const folder = folders.value.find(f => f.id === folderId);
+  return folder?.plans || [];
 };
 
 // Get uncategorized plans
 const getUncategorizedPlans = () => {
-  return planStore.plans.filter(plan => !planFolders.value[plan.id]);
-};
-
-// Get folder plan count
-const getFolderPlanCount = (folderId) => {
-  return getPlansInFolder(folderId).length;
+  const plansInFolders = new Set();
+  folders.value.forEach(folder => {
+    if (folder.plans) {
+      folder.plans.forEach(plan => plansInFolders.add(plan.id));
+    }
+  });
+  
+  return planStore.plans.filter(plan => !plansInFolders.has(plan.id));
 };
 
 // Get plan cover image

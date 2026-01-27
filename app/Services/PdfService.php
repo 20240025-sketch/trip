@@ -44,10 +44,11 @@ class PdfService
         $dompdf = $pdf->getDomPDF();
         $options = $dompdf->getOptions();
         
-        // Set font directories
+        // Set font directories and enable local file access for images
         $options->setFontDir(storage_path('fonts'));
         $options->setFontCache(storage_path('fonts'));
         $options->setIsRemoteEnabled(false);
+        $options->setChroot(public_path()); // Allow access to public directory for images
         $options->setDefaultFont('ipaexg');
         
         return $pdf;

@@ -28,69 +28,76 @@
         </button>
         
         <!-- Desktop Navigation -->
-        <div class="hidden lg:flex items-center gap-2">
+        <div class="hidden lg:flex items-center gap-1 overflow-x-auto max-w-full">
           <router-link 
             to="/" 
-            class="px-4 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+            class="px-2 py-2 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
           >
-            <span class="text-xl">🏠</span>
+            <span class="text-lg">🏠</span>
             <span>ホーム</span>
           </router-link>
           <router-link 
             to="/attachments" 
-            class="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+            class="px-2 py-2 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
           >
-            <span class="text-xl">📎</span>
-            <span>添付ファイル</span>
+            <span class="text-lg">📎</span>
+            <span>添付</span>
           </router-link>
           <router-link 
             to="/qa" 
-            class="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+            class="px-2 py-2 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
           >
-            <span class="text-xl">💬</span>
+            <span class="text-lg">💬</span>
             <span>Q&A</span>
           </router-link>
           <router-link 
             to="/notifications" 
-            class="px-4 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 relative whitespace-nowrap"
+            class="px-2 py-2 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-1 relative whitespace-nowrap text-sm"
           >
-            <span class="text-xl">📢</span>
+            <span class="text-lg">📢</span>
             <span>お知らせ</span>
             <span v-if="unreadCount > 0" class="absolute -top-1 -right-1 bg-gradient-to-r from-cyan-400 to-blue-400 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
               {{ unreadCount > 9 ? '9+' : unreadCount }}
             </span>
           </router-link>
           <router-link 
-            to="/assignments" 
-            class="px-4 py-2.5 text-gray-700 hover:text-green-600 font-semibold rounded-full hover:bg-green-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+            to="/my-assignments" 
+            class="px-2 py-2 text-gray-700 hover:text-green-600 font-semibold rounded-full hover:bg-green-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
           >
-            <span class="text-xl">🚌🏠</span>
-            <span>部屋割・バス</span>
+            <span class="text-lg">🏨</span>
+            <span>マイ部屋割</span>
+          </router-link>
+          <router-link 
+            to="/assignments" 
+            class="px-2 py-2 text-gray-700 hover:text-purple-600 font-semibold rounded-full hover:bg-purple-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
+          >
+            <span class="text-lg">🚌</span>
+            <span>部屋割管理</span>
           </router-link>
           <router-link 
             to="/plans" 
-            class="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+            class="px-2 py-2 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
           >
-            <span class="text-xl">📋</span>
+            <span class="text-lg">📋</span>
             <span>プラン一覧</span>
           </router-link>
           
           <template v-if="authStore.isAuthenticated">
             <router-link 
               to="/plans/create" 
-              class="px-5 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+              class="px-3 py-2 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm ml-2"
             >
-              <span class="text-xl">✨</span>
-              <span>新しい旅を計画</span>
+              <span class="text-lg">✨</span>
+              <span>新規作成</span>
             </router-link>
             
-            <div class="flex items-center gap-2 ml-2">
+            <div class="flex items-center gap-1 ml-2">
               <!-- User Info -->
-              <div class="px-4 py-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-full shadow-sm border-2 border-cyan-200">
-                <div class="flex items-center gap-2">
+              <div class="px-3 py-2 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-full shadow-sm border-2 border-cyan-200">
+                <div class="flex items-center gap-1">
                   <span class="text-sm text-gray-600">👤</span>
                   <div class="flex flex-col">
-                    <span class="font-semibold text-gray-800">{{ authStore.user?.name }}</span>
+                    <span class="font-semibold text-gray-800 text-sm">{{ authStore.user?.name }}</span>
                     <span v-if="isAdmin" class="text-xs text-cyan-600 font-bold">
                       管理者
                     </span>
@@ -105,9 +112,9 @@
               <div class="relative" ref="dropdownContainer">
                 <button
                   @click="toggleDropdown"
-                  class="px-4 py-2 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-1"
+                  class="px-2 py-2 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-1"
                 >
-                  <span class="text-xl">⚙️</span>
+                  <span class="text-lg">⚙️</span>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
@@ -141,16 +148,16 @@
           <template v-else>
             <router-link 
               to="/login" 
-              class="px-4 py-2.5 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+              class="px-3 py-2 text-gray-700 hover:text-cyan-600 font-semibold rounded-full hover:bg-cyan-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm ml-2"
             >
-              <span class="text-xl">🔑</span>
+              <span class="text-lg">🔑</span>
               <span>ログイン</span>
             </router-link>
             <router-link 
               to="/register" 
-              class="px-5 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+              class="px-3 py-2 bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-bold rounded-full hover:from-cyan-500 hover:to-blue-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
             >
-              <span class="text-xl">✨</span>
+              <span class="text-lg">✨</span>
               <span>新規登録</span>
             </router-link>
           </template>
@@ -206,11 +213,19 @@
             </router-link>
             <router-link 
               @click="closeMobileMenu"
-              to="/assignments" 
+              to="/my-assignments" 
               class="px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 font-semibold rounded-lg transition-all flex items-center gap-3"
             >
+              <span class="text-xl">🏨🚌</span>
+              <span>マイ部屋割・バス</span>
+            </router-link>
+            <router-link 
+              @click="closeMobileMenu"
+              to="/assignments" 
+              class="px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 font-semibold rounded-lg transition-all flex items-center gap-3"
+            >
               <span class="text-xl">🚌🏠</span>
-              <span>部屋割・バス</span>
+              <span>部屋割・バス管理</span>
             </router-link>
             <router-link 
               @click="closeMobileMenu"

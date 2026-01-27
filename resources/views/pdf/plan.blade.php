@@ -297,6 +297,19 @@
                                         @endif
                                     </div>
                                 @endif
+                                @if($item->images && count($item->images) > 0)
+                                    <div style="margin-top: 8px;">
+                                        @foreach($item->images as $image)
+                                            @php
+                                                // Get the full file system path for the image
+                                                $imagePath = public_path(str_replace('/storage/', 'storage/', $image->path));
+                                            @endphp
+                                            @if(file_exists($imagePath))
+                                                <img src="{{ $imagePath }}" style="max-width: 200px; max-height: 150px; margin: 3px; border-radius: 3px; border: 1px solid #ddd;" />
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -344,6 +357,29 @@
     <div class="section">
         <div class="section-title">メモ</div>
         <div class="memo-box">{{ $plan->memo }}</div>
+    </div>
+    @endif
+
+    <!-- プラン画像 -->
+    @if($plan->images && count($plan->images) > 0)
+    <div class="section">
+        <div class="section-title">画像</div>
+        <div style="padding: 10px;">
+            @foreach($plan->images as $image)
+                @php
+                    // Get the full file system path for the image
+                    $imagePath = public_path(str_replace('/storage/', 'storage/', $image->path));
+                @endphp
+                @if(file_exists($imagePath))
+                    <div style="margin-bottom: 10px; page-break-inside: avoid;">
+                        <img src="{{ $imagePath }}" style="max-width: 100%; height: auto; border-radius: 5px; border: 1px solid #ddd;" />
+                        @if($image->caption)
+                            <div style="margin-top: 5px; font-size: 9pt; color: #555;">{{ $image->caption }}</div>
+                        @endif
+                    </div>
+                @endif
+            @endforeach
+        </div>
     </div>
     @endif
 

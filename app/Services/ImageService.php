@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Image;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Laravel\Facades\Image as InterventionImage;
@@ -21,37 +22,51 @@ class ImageService
      */
     public function upload(UploadedFile $file, string $imageableType, int $imageableId, ?string $caption = null): Image
     {
-        // Generate unique filename
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        // Log upload details
+        Log::info('Image upload started', [
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'extension' => $file->getClientOriginalExtension(),
+        ]);
         
-        // Define paths
+        // Generate unique filename preserving original extension
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $extension;
+        
+        // Define storage paths  
         $path = 'plans/' . $filename;
         $thumbnailPath = 'thumbnails/' . $filename;
         
-        // Process and save original image
-        $image = InterventionImage::read($file);
+        // Ensure directories exist
+        Storage::disk('public')->makeDirectory('plans');
+        Storage::disk('public')->makeDirectory('thumbnails');
         
-        // Resize original if too large (max width 1920px)
-        if ($image->width() > 1920) {
-            $image->scale(width: 1920);
-        }
+        // Store original image directly without any processing
+        $storedPath = $file->storeAs('plans', $filename, 'public');
         
-        // Save original with quality 90
-        $encodedImage = $image->toJpeg(quality: 90);
-        Storage::disk('public')->put($path, $encodedImage);
+        // Copy to thumbnails as well (can add actual thumbnail processing later if needed)
+        $file->storeAs('thumbnails', $filename, 'public');
         
-        // Create and save thumbnail (max width 800px)
-        $thumbnail = InterventionImage::read($file);
-        $thumbnail->scale(width: 800);
-        $encodedThumbnail = $thumbnail->toJpeg(quality: 85);
-        Storage::disk('public')->put($thumbnailPath, $encodedThumbnail);
+        // Verify file was saved correctly
+        $fullPath = Storage::disk('public')->path($path);
+        $fileSize = file_exists($fullPath) ? filesize($fullPath) : 0;
+        
+        Log::info('Image upload completed', [
+            'filename' => $filename,
+            'stored_path' => $storedPath,
+            'full_path' => $fullPath,
+            'file_exists' => file_exists($fullPath),
+            'saved_size' => $fileSize,
+            'original_size' => $file->getSize(),
+        ]);
         
         // Get the last order number for this imageable
         $lastOrder = Image::where('imageable_type', $imageableType)
             ->where('imageable_id', $imageableId)
             ->max('order') ?? -1;
         
-        // Create image record
+        // Create image record with /storage/ prefix for public access
         return Image::create([
             'imageable_type' => $imageableType,
             'imageable_id' => $imageableId,

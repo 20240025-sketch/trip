@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BelongingController;
 use App\Http\Controllers\Api\BusAssignmentController;
 use App\Http\Controllers\Api\ChecklistItemController;
 use App\Http\Controllers\Api\DayController;
+use App\Http\Controllers\Api\FolderController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ParticipantController;
@@ -79,6 +80,24 @@ Route::middleware('auth:sanctum')->group(function () {
     // Plan Attachments - write operations only
     Route::post('plans/{plan}/attachments', [PlanAttachmentController::class, 'store']);
     Route::delete('plans/{plan}/attachments/{attachment}', [PlanAttachmentController::class, 'destroy']);
+    
+    // Folders
+    Route::apiResource('folders', FolderController::class);
+    Route::post('folders/{folder}/plans', [FolderController::class, 'addPlan']);
+    Route::delete('folders/{folder}/plans/{plan}', [FolderController::class, 'removePlan']);
+    
+    // Admin: User Import
+    Route::prefix('admin')->group(function() {
+        Route::get('users/import/template', [\App\Http\Controllers\Api\Admin\UserImportController::class, 'downloadTemplate']);
+        Route::post('users/import', [\App\Http\Controllers\Api\Admin\UserImportController::class, 'import']);
+        Route::get('assignments/import/template', [\App\Http\Controllers\Api\Admin\UserImportController::class, 'downloadAssignmentTemplate']);
+        Route::post('assignments/import', [\App\Http\Controllers\Api\Admin\UserImportController::class, 'importAssignments']);
+    });
+    
+    // Assignments
+    Route::get('assignments', [\App\Http\Controllers\Api\AssignmentController::class, 'show']);
+    Route::get('assignments/all', [\App\Http\Controllers\Api\AssignmentController::class, 'index']);
+    Route::put('assignments/{user}', [\App\Http\Controllers\Api\AssignmentController::class, 'update']);
     
     // PDF - requires auth to check permissions
     Route::get('plans/{plan}/pdf', [PdfController::class, 'generate']);

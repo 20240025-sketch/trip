@@ -1,0 +1,221 @@
+<?php
+
+namespace App\Http\Controllers\Api\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
+class UserImportController extends Controller
+{
+    /**
+     * Download CSV template for user import
+     */
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="user_import_template.csv"',
+        ];
+
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for Excel UTF-8 support
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // Header row
+            fputcsv($file, ['name', 'email', 'password', 'role', 'room_day1', 'room_day2', 'room_day3', 'bus_number']);
+            
+            // Example rows
+            fputcsv($file, ['山田太郎', 'yamada@example.com', 'password123', 'user', '101', '201', '301', '1号車']);
+            fputcsv($file, ['管理者', 'admin@example.com', 'admin123', 'admin', '', '', '', '']);
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import users from CSV
+     */
+    public function import(Request $request): JsonResponse
+    {
+        // Check if user is admin
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'message' => '管理者のみがユーザーをインポートできます。'
+            ], 403);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->getRealPath();
+        
+        $data = array_map(function($line) {
+            return str_getcsv($line);
+        }, file($path));
+
+        // Remove header row
+        $header = array_shift($data);
+        
+        $imported = 0;
+        $errors = [];
+
+        foreach ($data as $index => $row) {
+            // Minimum required fields: name, email, password
+            if (count($row) < 3) {
+                $errors[] = "行 " . ($index + 2) . ": 不完全なデータ（最低3列必要: name, email, password）";
+                continue;
+            }
+
+            // Build user data with all available fields
+            $userData = [
+                'name' => trim($row[0]),
+                'email' => trim($row[1]),
+                'password' => trim($row[2]),
+                'role' => isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : 'user',
+            ];
+
+            // Optional assignment fields
+            $assignmentData = [
+                'room_day1' => isset($row[4]) && trim($row[4]) !== '' ? trim($row[4]) : null,
+                'room_day2' => isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : null,
+                'room_day3' => isset($row[6]) && trim($row[6]) !== '' ? trim($row[6]) : null,
+                'bus_number' => isset($row[7]) && trim($row[7]) !== '' ? trim($row[7]) : null,
+            ];
+
+            $validator = Validator::make($userData, [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:6',
+                'role' => 'required|in:user,admin',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[] = "行 " . ($index + 2) . ": " . implode(', ', $validator->errors()->all());
+                continue;
+            }
+
+            try {
+                User::create([
+                    'name' => $userData['name'],
+                    'email' => $userData['email'],
+                    'password' => Hash::make($userData['password']),
+                    'role' => $userData['role'],
+                    'room_day1' => $assignmentData['room_day1'],
+                    'room_day2' => $assignmentData['room_day2'],
+                    'room_day3' => $assignmentData['room_day3'],
+                    'bus_number' => $assignmentData['bus_number'],
+                ]);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "行 " . ($index + 2) . ": " . $e->getMessage();
+            }
+        }
+
+        return response()->json([
+            'message' => "{$imported}件のユーザーをインポートしました。",
+            'imported' => $imported,
+            'errors' => $errors,
+        ]);
+    }
+
+    /**
+     * Download CSV template for assignment import
+     */
+    public function downloadAssignmentTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="assignment_import_template.csv"',
+        ];
+
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for Excel UTF-8 support
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // Header row
+            fputcsv($file, ['email', 'room_day1', 'room_day2', 'room_day3', 'bus_number']);
+            
+            // Example row
+            fputcsv($file, ['yamada@example.com', '101', '202', '303', '1号車']);
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import assignments from CSV
+     */
+    public function importAssignments(Request $request): JsonResponse
+    {
+        // Check if user is admin
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'message' => '管理者のみが部屋割・バス座席をインポートできます。'
+            ], 403);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->getRealPath();
+        
+        $data = array_map(function($line) {
+            return str_getcsv($line);
+        }, file($path));
+
+        // Remove header row
+        $header = array_shift($data);
+        
+        $updated = 0;
+        $errors = [];
+
+        foreach ($data as $index => $row) {
+            if (count($row) < 5) {
+                $errors[] = "行 " . ($index + 2) . ": 不完全なデータ";
+                continue;
+            }
+
+            $email = trim($row[0]);
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                $errors[] = "行 " . ($index + 2) . ": ユーザーが見つかりません (${email})";
+                continue;
+            }
+
+            try {
+                $user->update([
+                    'room_day1' => trim($row[1]) ?: null,
+                    'room_day2' => trim($row[2]) ?: null,
+                    'room_day3' => trim($row[3]) ?: null,
+                    'bus_number' => trim($row[4]) ?: null,
+                ]);
+                $updated++;
+            } catch (\Exception $e) {
+                $errors[] = "行 " . ($index + 2) . ": " . $e->getMessage();
+            }
+        }
+
+        return response()->json([
+            'message' => "{$updated}件のユーザー情報を更新しました。",
+            'updated' => $updated,
+            'errors' => $errors,
+        ]);
+    }
+}

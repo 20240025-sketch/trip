@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
@@ -79,6 +80,12 @@ class Plan extends Model
     public function busAssignments(): HasMany
     {
         return $this->hasMany(BusAssignment::class);
+    }
+
+    public function folders(): BelongsToMany
+    {
+        return $this->belongsToMany(Folder::class, 'folder_plan')
+            ->withTimestamps();
     }
 
     public function user(): BelongsTo
