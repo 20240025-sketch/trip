@@ -24,13 +24,12 @@
                 <span class="font-mono text-xs">name, email, password, role, room_day1-3, bus_number</span>
               </p>
               <div class="space-y-2">
-                <a 
-                  href="/api/admin/users/import/template" 
-                  download
+                <button 
+                  @click="downloadUserTemplate"
                   class="block w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center text-sm"
                 >
                   📄 テンプレートダウンロード
-                </a>
+                </button>
                 <input 
                   type="file" 
                   @change="handleUserImport" 
@@ -48,13 +47,12 @@
                 <span class="font-mono text-xs">email, room_day1, room_day2, room_day3, bus_number</span>
               </p>
               <div class="space-y-2">
-                <a 
-                  href="/api/admin/assignments/import/template" 
-                  download
+                <button 
+                  @click="downloadAssignmentTemplate"
                   class="block w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-center text-sm"
                 >
                   📄 テンプレートダウンロード
-                </a>
+                </button>
                 <input 
                   type="file" 
                   @change="handleAssignmentImport" 
@@ -244,6 +242,46 @@ const loadAllUsers = async () => {
     allUsers.value = response.data;
   } catch (error) {
     console.error('Failed to load all users:', error);
+  }
+};
+
+const downloadUserTemplate = async () => {
+  try {
+    const response = await axios.get('/api/admin/users/import/template', {
+      responseType: 'blob'
+    });
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'user_import_template.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download template:', error);
+    alert('テンプレートのダウンロードに失敗しました');
+  }
+};
+
+const downloadAssignmentTemplate = async () => {
+  try {
+    const response = await axios.get('/api/admin/assignments/import/template', {
+      responseType: 'blob'
+    });
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'assignment_import_template.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download template:', error);
+    alert('テンプレートのダウンロードに失敗しました');
   }
 };
 
