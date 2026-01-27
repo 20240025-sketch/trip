@@ -109,7 +109,70 @@
       <!-- Admin: All Users List -->
       <div v-if="isAdmin && allUsers.length > 0" class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-cyan-100">
         <div class="px-6 py-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-b-2 border-cyan-100">
-          <h2 class="text-xl font-bold text-gray-800">👥 全ユーザー一覧</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">👥 全ユーザー一覧</h2>
+            <div class="text-sm text-gray-600">
+              {{ filteredUsers.length }}件 / {{ allUsers.length }}件
+            </div>
+          </div>
+          
+          <!-- Class Filter -->
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-gray-700">🏫 クラスでフィルター</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                @click="toggleAllClasses"
+                :class="selectedClasses.length === 0 ? 'bg-cyan-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                ✅ すべて
+              </button>
+              <button
+                v-for="className in availableClasses"
+                :key="className"
+                @click="toggleClass(className)"
+                :class="selectedClasses.includes(className) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                {{ className }}
+              </button>
+            </div>
+          </div>
+          
+          <!-- Sort Options -->
+          <div class="space-y-2 mt-4">
+            <label class="text-sm font-semibold text-gray-700">🔢 並び替え</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                @click="sortByDay = ''"
+                :class="sortByDay === '' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                なし
+              </button>
+              <button
+                @click="sortByDay = 'day1'"
+                :class="sortByDay === 'day1' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                🛏️ １泊目
+              </button>
+              <button
+                @click="sortByDay = 'day2'"
+                :class="sortByDay === 'day2' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                🛏️ ２泊目
+              </button>
+              <button
+                @click="sortByDay = 'day3'"
+                :class="sortByDay === 'day3' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                🛏️ ３泊目
+              </button>
+            </div>
+          </div>
         </div>
         
         <div class="overflow-x-auto">
@@ -129,7 +192,7 @@
             </thead>
             <tbody>
               <tr 
-                v-for="user in allUsers" 
+                v-for="user in filteredUsers" 
                 :key="user.id"
                 :class="user.id === currentUser?.id ? 'bg-cyan-50' : editingUser?.id === user.id ? 'bg-yellow-50' : 'hover:bg-gray-50'"
                 class="border-b border-gray-100"
@@ -248,11 +311,59 @@ const authStore = useAuthStore();
 const currentUser = ref(null);
 const allUsers = ref([]);
 const editingUser = ref(null);
+const selectedClasses = ref([]);
+const sortByDay = ref(''); // '', 'day1', 'day2', 'day3'
 
 const isAdmin = computed(() => authStore.user?.role === 'admin');
 const hasAssignments = computed(() => {
   return currentUser.value?.room_day1 || currentUser.value?.room_day2 || 
          currentUser.value?.room_day3 || currentUser.value?.bus_number;
+});
+
+// Get unique classes from all users
+const availableClasses = computed(() => {
+  const classes = allUsers.value
+    .map(u => u.class)
+    .filter(c => c && c.trim() !== '')
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .sort();
+  return classes;
+});
+
+// Filter users by selected classes and sort
+const filteredUsers = computed(() => {
+  let users = allUsers.value;
+  
+  // Filter by class
+  if (selectedClasses.value.length > 0) {
+    users = users.filter(user => 
+      selectedClasses.value.includes(user.class)
+    );
+  }
+  
+  // Sort by selected day
+  if (sortByDay.value) {
+    users = [...users].sort((a, b) => {
+      const fieldName = sortByDay.value === 'day1' ? 'room_day1' :
+                        sortByDay.value === 'day2' ? 'room_day2' : 'room_day3';
+      
+      const aValue = a[fieldName];
+      const bValue = b[fieldName];
+      
+      // Handle null/undefined/empty values - put them at the end
+      if (!aValue && !bValue) return 0;
+      if (!aValue) return 1;
+      if (!bValue) return -1;
+      
+      // Convert to numbers for proper numeric sorting
+      const aNum = parseFloat(aValue);
+      const bNum = parseFloat(bValue);
+      
+      return aNum - bNum;
+    });
+  }
+  
+  return users;
 });
 
 // Format value as integer (remove decimal points)
@@ -280,6 +391,19 @@ const loadAllUsers = async () => {
   } catch (error) {
     console.error('Failed to load all users:', error);
   }
+};
+
+const toggleClass = (className) => {
+  const index = selectedClasses.value.indexOf(className);
+  if (index > -1) {
+    selectedClasses.value.splice(index, 1);
+  } else {
+    selectedClasses.value.push(className);
+  }
+};
+
+const toggleAllClasses = () => {
+  selectedClasses.value = [];
 };
 
 const downloadUserTemplate = async () => {
