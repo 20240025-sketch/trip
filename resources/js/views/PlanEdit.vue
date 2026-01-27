@@ -659,10 +659,12 @@ const deleteBelonging = async (item) => {
 };
 
 onMounted(async () => {
-  // currentPlanが既にある場合（作成直後など）は再フェッチしない
-  // ただしIDが一致するか確認
-  if (!planStore.currentPlan || planStore.currentPlan.id !== parseInt(route.params.id)) {
-    await planStore.fetchPlan(route.params.id);
+  // 常にプランデータを最新の状態で取得する
+  await planStore.fetchPlan(route.params.id);
+  
+  // プランデータが読み込まれた後、belongingsを取得
+  if (plan.value) {
+    await fetchBelongings();
   }
 });
 
