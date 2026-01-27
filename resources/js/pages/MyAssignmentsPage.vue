@@ -171,6 +171,13 @@
               >
                 🛏️ ３泊目
               </button>
+              <button
+                @click="sortByDay = 'number'"
+                :class="sortByDay === 'number' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                🔢 番号
+              </button>
             </div>
           </div>
         </div>
@@ -312,7 +319,7 @@ const currentUser = ref(null);
 const allUsers = ref([]);
 const editingUser = ref(null);
 const selectedClasses = ref([]);
-const sortByDay = ref(''); // '', 'day1', 'day2', 'day3'
+const sortByDay = ref(''); // '', 'day1', 'day2', 'day3', 'number'
 
 const isAdmin = computed(() => authStore.user?.role === 'admin');
 const hasAssignments = computed(() => {
@@ -341,14 +348,20 @@ const filteredUsers = computed(() => {
     );
   }
   
-  // Sort by selected day
+  // Sort by selected day or number
   if (sortByDay.value) {
     users = [...users].sort((a, b) => {
-      const fieldName = sortByDay.value === 'day1' ? 'room_day1' :
-                        sortByDay.value === 'day2' ? 'room_day2' : 'room_day3';
+      let aValue, bValue;
       
-      const aValue = a[fieldName];
-      const bValue = b[fieldName];
+      if (sortByDay.value === 'number') {
+        aValue = a.number;
+        bValue = b.number;
+      } else {
+        const fieldName = sortByDay.value === 'day1' ? 'room_day1' :
+                          sortByDay.value === 'day2' ? 'room_day2' : 'room_day3';
+        aValue = a[fieldName];
+        bValue = b[fieldName];
+      }
       
       // Handle null/undefined/empty values - put them at the end
       if (!aValue && !bValue) return 0;
