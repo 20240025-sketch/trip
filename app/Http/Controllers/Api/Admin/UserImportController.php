@@ -155,10 +155,10 @@ class UserImportController extends Controller
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             
             // Header row
-            fputcsv($file, ['email', 'room_day1', 'room_day2', 'room_day3', 'bus_number']);
+            fputcsv($file, ['email', 'class', 'number', 'room_day1', 'room_day2', 'room_day3', 'bus_number']);
             
             // Example row
-            fputcsv($file, ['yamada@example.com', '101', '202', '303', '1号車']);
+            fputcsv($file, ['yamada@example.com', '1-A', '10', '101', '202', '303', '1号車']);
             
             fclose($file);
         };
@@ -196,7 +196,7 @@ class UserImportController extends Controller
         $errors = [];
 
         foreach ($data as $index => $row) {
-            if (count($row) < 5) {
+            if (count($row) < 7) {
                 $errors[] = "行 " . ($index + 2) . ": 不完全なデータ";
                 continue;
             }
@@ -211,10 +211,12 @@ class UserImportController extends Controller
 
             try {
                 $user->update([
-                    'room_day1' => trim($row[1]) ?: null,
-                    'room_day2' => trim($row[2]) ?: null,
-                    'room_day3' => trim($row[3]) ?: null,
-                    'bus_number' => trim($row[4]) ?: null,
+                    'class' => trim($row[1]) ?: null,
+                    'number' => trim($row[2]) ?: null,
+                    'room_day1' => trim($row[3]) ?: null,
+                    'room_day2' => trim($row[4]) ?: null,
+                    'room_day3' => trim($row[5]) ?: null,
+                    'bus_number' => trim($row[6]) ?: null,
                 ]);
                 $updated++;
             } catch (\Exception $e) {

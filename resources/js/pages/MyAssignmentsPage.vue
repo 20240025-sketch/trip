@@ -44,7 +44,7 @@
               <h3 class="font-bold text-gray-700 mb-3">部屋割・バス座席更新</h3>
               <p class="text-xs text-gray-600 mb-3">
                 既存ユーザーの部屋割・バス座席のみを更新<br>
-                <span class="font-mono text-xs">email, room_day1, room_day2, room_day3, bus_number</span>
+                <span class="font-mono text-xs">email, class, number, room_day1, room_day2, room_day3, bus_number</span>
               </p>
               <div class="space-y-2">
                 <button 
