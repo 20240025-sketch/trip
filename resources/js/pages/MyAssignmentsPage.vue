@@ -81,15 +81,15 @@
           </div>
           <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
             <div class="text-sm opacity-90 mb-1">🏠 1泊目</div>
-            <div class="font-bold">{{ currentUser?.room_day1 || '未設定' }}</div>
+            <div class="font-bold">{{ formatAsInteger(currentUser?.room_day1) || '未設定' }}</div>
           </div>
           <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
             <div class="text-sm opacity-90 mb-1">🏠 2泊目</div>
-            <div class="font-bold">{{ currentUser?.room_day2 || '未設定' }}</div>
+            <div class="font-bold">{{ formatAsInteger(currentUser?.room_day2) || '未設定' }}</div>
           </div>
           <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
             <div class="text-sm opacity-90 mb-1">🏠 3泊目</div>
-            <div class="font-bold">{{ currentUser?.room_day3 || '未設定' }}</div>
+            <div class="font-bold">{{ formatAsInteger(currentUser?.room_day3) || '未設定' }}</div>
           </div>
           <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
             <div class="text-sm opacity-90 mb-1">🚌 バス</div>
@@ -139,7 +139,7 @@
                     class="w-full px-2 py-1 border rounded text-sm"
                     placeholder="101"
                   />
-                  <span v-else class="text-sm">{{ user.room_day1 || '-' }}</span>
+                  <span v-else class="text-sm">{{ formatAsInteger(user.room_day1) || '-' }}</span>
                 </td>
                 <td class="px-4 py-3">
                   <input 
@@ -149,7 +149,7 @@
                     class="w-full px-2 py-1 border rounded text-sm"
                     placeholder="202"
                   />
-                  <span v-else class="text-sm">{{ user.room_day2 || '-' }}</span>
+                  <span v-else class="text-sm">{{ formatAsInteger(user.room_day2) || '-' }}</span>
                 </td>
                 <td class="px-4 py-3">
                   <input 
@@ -159,7 +159,7 @@
                     class="w-full px-2 py-1 border rounded text-sm"
                     placeholder="303"
                   />
-                  <span v-else class="text-sm">{{ user.room_day3 || '-' }}</span>
+                  <span v-else class="text-sm">{{ formatAsInteger(user.room_day3) || '-' }}</span>
                 </td>
                 <td class="px-4 py-3">
                   <input 
@@ -224,6 +224,13 @@ const hasAssignments = computed(() => {
   return currentUser.value?.room_day1 || currentUser.value?.room_day2 || 
          currentUser.value?.room_day3 || currentUser.value?.bus_number;
 });
+
+// Format value as integer (remove decimal points)
+const formatAsInteger = (value) => {
+  if (!value) return null;
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? value : Math.floor(parsed).toString();
+};
 
 const loadCurrentUser = async () => {
   try {
