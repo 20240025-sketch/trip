@@ -31,11 +31,11 @@ class UserImportController extends Controller
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             
             // Header row
-            fputcsv($file, ['name', 'email', 'password', 'role', 'room_day1', 'room_day2', 'room_day3', 'bus_number']);
+            fputcsv($file, ['name', 'email', 'password', 'role', 'class', 'number', 'room_day1', 'room_day2', 'room_day3', 'bus_number']);
             
             // Example rows
-            fputcsv($file, ['山田太郎', 'yamada@example.com', 'password123', 'user', '101', '201', '301', '1号車']);
-            fputcsv($file, ['管理者', 'admin@example.com', 'admin123', 'admin', '', '', '', '']);
+            fputcsv($file, ['山田太郎', 'yamada@example.com', 'password123', 'user', '1年A組', '12', '101', '201', '301', '1号車']);
+            fputcsv($file, ['管理者', 'admin@example.com', 'admin123', 'admin', '', '', '', '', '', '']);
             
             fclose($file);
         };
@@ -87,12 +87,14 @@ class UserImportController extends Controller
                 'role' => isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : 'user',
             ];
 
-            // Optional assignment fields
-            $assignmentData = [
-                'room_day1' => isset($row[4]) && trim($row[4]) !== '' ? trim($row[4]) : null,
-                'room_day2' => isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : null,
-                'room_day3' => isset($row[6]) && trim($row[6]) !== '' ? trim($row[6]) : null,
-                'bus_number' => isset($row[7]) && trim($row[7]) !== '' ? trim($row[7]) : null,
+            // Optional fields
+            $optionalData = [
+                'class' => isset($row[4]) && trim($row[4]) !== '' ? trim($row[4]) : null,
+                'number' => isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : null,
+                'room_day1' => isset($row[6]) && trim($row[6]) !== '' ? trim($row[6]) : null,
+                'room_day2' => isset($row[7]) && trim($row[7]) !== '' ? trim($row[7]) : null,
+                'room_day3' => isset($row[8]) && trim($row[8]) !== '' ? trim($row[8]) : null,
+                'bus_number' => isset($row[9]) && trim($row[9]) !== '' ? trim($row[9]) : null,
             ];
 
             $validator = Validator::make($userData, [
@@ -113,10 +115,12 @@ class UserImportController extends Controller
                     'email' => $userData['email'],
                     'password' => Hash::make($userData['password']),
                     'role' => $userData['role'],
-                    'room_day1' => $assignmentData['room_day1'],
-                    'room_day2' => $assignmentData['room_day2'],
-                    'room_day3' => $assignmentData['room_day3'],
-                    'bus_number' => $assignmentData['bus_number'],
+                    'class' => $optionalData['class'],
+                    'number' => $optionalData['number'],
+                    'room_day1' => $optionalData['room_day1'],
+                    'room_day2' => $optionalData['room_day2'],
+                    'room_day3' => $optionalData['room_day3'],
+                    'bus_number' => $optionalData['bus_number'],
                 ]);
                 $imported++;
             } catch (\Exception $e) {

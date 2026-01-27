@@ -26,6 +26,8 @@ class AssignmentController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'class' => $user->class,
+            'number' => $user->number,
             'room_day1' => $user->room_day1,
             'room_day2' => $user->room_day2,
             'room_day3' => $user->room_day3,
@@ -53,7 +55,7 @@ class AssignmentController extends Controller
             ], 403);
         }
 
-        $users = User::select('id', 'name', 'email', 'room_day1', 'room_day2', 'room_day3', 'bus_number', 'role')
+        $users = User::select('id', 'name', 'email', 'class', 'number', 'room_day1', 'room_day2', 'room_day3', 'bus_number', 'role')
             ->orderBy('role', 'desc') // admin first
             ->orderBy('name')
             ->get();
@@ -83,6 +85,8 @@ class AssignmentController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
+            'class' => 'nullable|string|max:255',
+            'number' => 'nullable|string|max:255',
             'room_day1' => 'nullable|string|max:255',
             'room_day2' => 'nullable|string|max:255',
             'room_day3' => 'nullable|string|max:255',
@@ -97,6 +101,8 @@ class AssignmentController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'class' => $user->class,
+                'number' => $user->number,
                 'room_day1' => $user->room_day1,
                 'room_day2' => $user->room_day2,
                 'room_day3' => $user->room_day3,

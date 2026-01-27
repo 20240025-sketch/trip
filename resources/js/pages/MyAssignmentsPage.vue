@@ -21,7 +21,7 @@
               <h3 class="font-bold text-gray-700 mb-3">ユーザー一括インポート</h3>
               <p class="text-xs text-gray-600 mb-3">
                 ユーザー情報と部屋割・バス座席を同時にインポート可能<br>
-                <span class="font-mono text-xs">name, email, password, role, room_day1-3, bus_number</span>
+                <span class="font-mono text-xs">name, email, password, role, class, number, room_day1-3, bus_number</span>
               </p>
               <div class="space-y-2">
                 <button 
@@ -80,6 +80,14 @@
             <div class="font-bold">{{ currentUser?.name }}</div>
           </div>
           <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
+            <div class="text-sm opacity-90 mb-1">📚 クラス</div>
+            <div class="font-bold">{{ currentUser?.class || '未設定' }}</div>
+          </div>
+          <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
+            <div class="text-sm opacity-90 mb-1">🔢 出席番号</div>
+            <div class="font-bold">{{ currentUser?.number || '未設定' }}</div>
+          </div>
+          <div class="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
             <div class="text-sm opacity-90 mb-1">🏠 1泊目</div>
             <div class="font-bold">{{ formatAsInteger(currentUser?.room_day1) || '未設定' }}</div>
           </div>
@@ -110,6 +118,8 @@
               <tr>
                 <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">メール</th>
                 <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">名前</th>
+                <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">クラス</th>
+                <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">番号</th>
                 <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">1泊目</th>
                 <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">2泊目</th>
                 <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">3泊目</th>
@@ -131,6 +141,26 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm font-medium">{{ user.name }}</td>
+                <td class="px-4 py-3">
+                  <input 
+                    v-if="editingUser?.id === user.id"
+                    v-model="editingUser.class"
+                    type="text"
+                    class="w-full px-2 py-1 border rounded text-sm"
+                    placeholder="1年A組"
+                  />
+                  <span v-else class="text-sm">{{ user.class || '-' }}</span>
+                </td>
+                <td class="px-4 py-3">
+                  <input 
+                    v-if="editingUser?.id === user.id"
+                    v-model="editingUser.number"
+                    type="text"
+                    class="w-full px-2 py-1 border rounded text-sm"
+                    placeholder="12"
+                  />
+                  <span v-else class="text-sm">{{ user.number || '-' }}</span>
+                </td>
                 <td class="px-4 py-3">
                   <input 
                     v-if="editingUser?.id === user.id"
@@ -360,6 +390,8 @@ const saveUser = async () => {
 
   try {
     const response = await axios.put(`/api/assignments/${editingUser.value.id}`, {
+      class: editingUser.value.class,
+      number: editingUser.value.number,
       room_day1: editingUser.value.room_day1,
       room_day2: editingUser.value.room_day2,
       room_day3: editingUser.value.room_day3,
