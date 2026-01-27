@@ -68,13 +68,6 @@
             <span>マイ部屋割</span>
           </router-link>
           <router-link 
-            to="/assignments" 
-            class="px-2 py-2 text-gray-700 hover:text-purple-600 font-semibold rounded-full hover:bg-purple-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
-          >
-            <span class="text-lg">🚌</span>
-            <span>部屋割管理</span>
-          </router-link>
-          <router-link 
             to="/plans" 
             class="px-2 py-2 text-gray-700 hover:text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all duration-300 flex items-center gap-1 whitespace-nowrap text-sm"
           >
@@ -218,14 +211,6 @@
             >
               <span class="text-xl">🏨🚌</span>
               <span>マイ部屋割・バス</span>
-            </router-link>
-            <router-link 
-              @click="closeMobileMenu"
-              to="/assignments" 
-              class="px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 font-semibold rounded-lg transition-all flex items-center gap-3"
-            >
-              <span class="text-xl">🚌🏠</span>
-              <span>部屋割・バス管理</span>
             </router-link>
             <router-link 
               @click="closeMobileMenu"
