@@ -57,9 +57,7 @@
               </div>
               <div class="flex-1">
                 <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
-                <p v-if="item.description" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed">
-                  {{ item.description }}
-                </p>
+                <div v-if="item.description" v-html="linkifyDescription(item.description)" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed"></div>
                 <p v-if="item.location" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">
                   📍 {{ item.location }}
                 </p>
@@ -71,15 +69,27 @@
                   <span v-if="item.transport_cost" class="ml-2">¥{{ item.transport_cost }}</span>
                 </div>
 
-                <!-- Images -->
+                <!-- Images and PDFs -->
                 <div v-if="item.images && item.images.length > 0" class="mt-3 sm:mt-4 flex gap-2 flex-wrap">
+                  <!-- Image files -->
                   <img 
-                    v-for="image in item.images" 
+                    v-for="image in item.images.filter(img => !isPdf(img))" 
                     :key="image.id"
-                    :src="image.thumbnail_path || image.image_path" 
+                    :src="getImageUrl(image)" 
                     :alt="item.title"
-                    class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-cyan-100"
+                    class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-cyan-100 cursor-pointer hover:opacity-80"
+                    @click="viewImage(image)"
                   >
+                  <!-- PDF files -->
+                  <div
+                    v-for="pdf in item.images.filter(img => isPdf(img))"
+                    :key="pdf.id"
+                    @click="viewImage(pdf)"
+                    class="w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center rounded-xl border-2 border-red-200 bg-red-50 cursor-pointer hover:bg-red-100 transition-colors"
+                  >
+                    <span class="text-3xl">📄</span>
+                    <span class="text-xs text-red-600 font-semibold mt-1">PDF</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -181,6 +191,56 @@ const formatDateRange = (startDate, endDate) => {
   }
   
   return `${start.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })}`;
+};
+
+const getImageUrl = (image) => {
+  // Use thumbnail if available, otherwise use original path
+  if (image.thumbnail_path) {
+    return image.thumbnail_path.startsWith('/storage/') ? image.thumbnail_path : `/storage/${image.thumbnail_path}`;
+  }
+  if (image.path) {
+    return image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
+  }
+  if (image.image_path) {
+    return image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
+  }
+  return image.file_path ? (image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`) : '';
+};
+
+const isPdf = (image) => {
+  return image.mime_type === 'application/pdf' || 
+         (image.filename && image.filename.toLowerCase().endsWith('.pdf')) ||
+         (image.original_name && image.original_name.toLowerCase().endsWith('.pdf'));
+};
+
+const linkifyDescription = (text) => {
+  if (!text) return '';
+  
+  // URLパターンにマッチする正規表現
+  const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"'\]\s])/gi;
+  
+  // HTMLエスケープ
+  const escapeHtml = (str) => {
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+  };
+  
+  // URLをリンクに変換
+  const escaped = escapeHtml(text);
+  const linked = escaped.replace(urlPattern, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">${url}</a>`;
+  });
+  
+  // 改行をbrタグに変換
+  return linked.replace(/\n/g, '<br>');
+};
+
+const viewImage = (image) => {
+  const url = getImageUrl(image);
+  window.open(url, '_blank');
 };
 
 onMounted(() => {

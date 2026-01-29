@@ -58,13 +58,24 @@ class PlanAttachmentController extends Controller
             }
 
             $attachments = $plan->attachments()->get()->map(function ($attachment) {
+                $url = $attachment->getUrl();
+                
+                // Debug logging
+                Log::info('Attachment URL generation', [
+                    'id' => $attachment->id,
+                    'file_path' => $attachment->file_path,
+                    'generated_url' => $url,
+                    'storage_url' => Storage::url($attachment->file_path),
+                    'file_exists' => Storage::disk('public')->exists($attachment->file_path),
+                ]);
+                
                 return [
                     'id' => $attachment->id,
                     'original_name' => $attachment->original_name,
                     'mime_type' => $attachment->mime_type,
                     'file_size' => $attachment->file_size,
                     'formatted_size' => $attachment->getFormattedSize(),
-                    'url' => $attachment->getUrl(),
+                    'url' => $url,
                     'is_image' => $attachment->isImage(),
                     'is_pdf' => $attachment->isPdf(),
                     'extension' => $attachment->getExtension(),
@@ -108,6 +119,14 @@ class PlanAttachmentController extends Controller
         $storedName = Str::random(40) . '.' . $file->getClientOriginalExtension();
         $filePath = $file->storeAs('attachments', $storedName, 'public');
 
+        Log::info('Attachment file uploaded', [
+            'original_name' => $originalName,
+            'stored_name' => $storedName,
+            'file_path' => $filePath,
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+        ]);
+
         $attachment = PlanAttachment::create([
             'plan_id' => $plan->id,
             'original_name' => $originalName,
@@ -118,13 +137,23 @@ class PlanAttachmentController extends Controller
             'order' => $plan->attachments()->count(),
         ]);
 
+        $generatedUrl = $attachment->getUrl();
+        
+        Log::info('Attachment created', [
+            'attachment_id' => $attachment->id,
+            'file_path' => $attachment->file_path,
+            'generated_url' => $generatedUrl,
+            'storage_url' => Storage::url($attachment->file_path),
+            'file_exists' => Storage::disk('public')->exists($attachment->file_path),
+        ]);
+
         return response()->json([
             'id' => $attachment->id,
             'original_name' => $attachment->original_name,
             'mime_type' => $attachment->mime_type,
             'file_size' => $attachment->file_size,
             'formatted_size' => $attachment->getFormattedSize(),
-            'url' => $attachment->getUrl(),
+            'url' => $generatedUrl,
             'is_image' => $attachment->isImage(),
             'is_pdf' => $attachment->isPdf(),
             'extension' => $attachment->getExtension(),

@@ -111,16 +111,27 @@
                 <span v-if="item.transport_cost" class="ml-2 font-semibold">¥{{ item.transport_cost.toLocaleString() }}</span>
               </div>
 
-              <!-- Images -->
+              <!-- Images and PDFs -->
               <div v-if="item.images && item.images.length > 0" class="mt-3 sm:mt-4 flex gap-2 flex-wrap">
+                <!-- Image files -->
                 <img 
-                  v-for="image in item.images" 
+                  v-for="image in item.images.filter(img => !isPdf(img))" 
                   :key="image.id"
                   :src="getImageUrl(image)" 
                   :alt="item.title"
                   class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-blue-100 cursor-pointer hover:opacity-80"
                   @click="viewImage(image)"
                 >
+                <!-- PDF files -->
+                <div
+                  v-for="pdf in item.images.filter(img => isPdf(img))"
+                  :key="pdf.id"
+                  @click="viewImage(pdf)"
+                  class="w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center rounded-xl border-2 border-red-200 bg-red-50 cursor-pointer hover:bg-red-100 transition-colors"
+                >
+                  <span class="text-3xl">📄</span>
+                  <span class="text-xs text-red-600 font-semibold mt-1">PDF</span>
+                </div>
               </div>
             </div>
             </div>
@@ -161,29 +172,41 @@
     </div>
 
     <!-- Checklist -->
-    <div v-if="plan.checklist_items && plan.checklist_items.length > 0" class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-lg shadow-md p-4 sm:p-6">
-      <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">チェックリスト</h2>
-      <div class="space-y-3 sm:space-y-4">
-        <div v-for="(items, category) in groupedChecklist" :key="category">
-          <h3 class="font-bold text-base sm:text-lg mb-2">{{ category }}</h3>
+    <div class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-cyan-100">
+      <div class="flex items-center gap-2 mb-4 sm:mb-6">
+        <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+          <span>✅</span>
+          <span>持ち物リスト</span>
+        </h2>
+      </div>
+      
+      <div v-if="belongings.length > 0" class="space-y-3 sm:space-y-4">
+        <div v-for="(items, category) in groupedChecklist" :key="category" class="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200">
+          <h3 class="font-bold text-base sm:text-lg mb-3 text-cyan-700">{{ category }}</h3>
           <div class="space-y-2">
             <label 
               v-for="item in items" 
               :key="item.id"
-              class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors text-sm sm:text-base"
+              class="flex items-center gap-3 cursor-pointer hover:bg-white hover:shadow-sm p-3 rounded-lg transition-all text-sm sm:text-base"
             >
               <input 
                 type="checkbox" 
                 :checked="item.is_checked"
-                @change="toggleChecklistItem(item.id)"
-                class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 cursor-pointer flex-shrink-0"
+                @change="toggleBelonging(item)"
+                class="w-5 h-5 text-cyan-600 cursor-pointer flex-shrink-0 rounded focus:ring-cyan-500"
               >
-              <span :class="{ 'line-through text-gray-400': item.is_checked }" class="break-words">
-                {{ item.item }}
+              <span :class="{ 'line-through text-gray-400': item.is_checked, 'text-gray-700': !item.is_checked }" class="break-words font-medium">
+                {{ item.name }}
               </span>
             </label>
           </div>
         </div>
+      </div>
+      
+      <div v-else class="text-center py-12 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border-2 border-dashed border-cyan-200">
+        <div class="text-5xl sm:text-6xl mb-4">📋</div>
+        <p class="text-gray-600 font-medium text-base sm:text-lg mb-2">持ち物リストがまだ追加されていません</p>
+        <p class="text-gray-500 text-sm sm:text-base">編集画面から持ち物を追加できます</p>
       </div>
     </div>
 
@@ -206,7 +229,7 @@
       <div v-if="plan.images && plan.images.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         <div v-for="image in plan.images" :key="image.id" class="relative group">
           <img 
-            :src="`/storage/${image.thumbnail_path || image.path}`"
+            :src="getImageUrl(image)"
             :alt="image.original_name || 'Image'"
             class="w-full h-28 sm:h-36 object-cover rounded-xl cursor-pointer shadow-md hover:shadow-xl transition-all hover:scale-105"
             @click="viewImage(image)"
@@ -240,6 +263,7 @@ import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useUiStore } from '@/stores/uiStore';
 import AttachmentManager from '@/components/AttachmentManager.vue';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
@@ -248,6 +272,7 @@ const authStore = useAuthStore();
 const uiStore = useUiStore();
 
 const plan = computed(() => planStore.currentPlan);
+const belongings = ref([]);
 
 const canEdit = computed(() => {
   if (!plan.value) return false;
@@ -277,14 +302,17 @@ const publicUrl = computed(() => {
 });
 
 const groupedChecklist = computed(() => {
-  if (!plan.value?.checklist_items) return {};
+  console.log('Belongings:', belongings.value);
   
-  return plan.value.checklist_items.reduce((acc, item) => {
-    const category = item.category || 'その他';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(item);
-    return acc;
-  }, {});
+  const carry = belongings.value.filter(b => b.type === 'carry');
+  const send = belongings.value.filter(b => b.type === 'send');
+  
+  const result = {};
+  if (carry.length > 0) result['所持するもの'] = carry;
+  if (send.length > 0) result['送るもの'] = send;
+  
+  console.log('Grouped checklist:', result);
+  return result;
 });
 
 const transportLabel = (type) => {
@@ -341,17 +369,37 @@ const downloadPdf = async () => {
 };
 
 const getImageUrl = (image) => {
+  console.log('getImageUrl called with:', image);
+  console.log('image.path:', image.path);
+  console.log('image.thumbnail_path:', image.thumbnail_path);
+  console.log('image.image_path:', image.image_path);
+  console.log('image.file_path:', image.file_path);
+  
   // Use thumbnail if available, otherwise use original path
   if (image.thumbnail_path) {
-    return image.thumbnail_path.startsWith('/storage/') ? image.thumbnail_path : `/storage/${image.thumbnail_path}`;
+    const url = image.thumbnail_path.startsWith('/storage/') ? image.thumbnail_path : `/storage/${image.thumbnail_path}`;
+    console.log('Using thumbnail_path:', url);
+    return url;
   }
   if (image.path) {
-    return image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
+    const url = image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
+    console.log('Using path:', url);
+    return url;
   }
   if (image.image_path) {
-    return image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
+    const url = image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
+    console.log('Using image_path:', url);
+    return url;
   }
-  return image.file_path ? (image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`) : '';
+  const url = image.file_path ? (image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`) : '';
+  console.log('Using file_path or empty:', url);
+  return url;
+};
+
+const isPdf = (image) => {
+  return image.mime_type === 'application/pdf' || 
+         (image.filename && image.filename.toLowerCase().endsWith('.pdf')) ||
+         (image.original_name && image.original_name.toLowerCase().endsWith('.pdf'));
 };
 
 const linkifyDescription = (text) => {
@@ -399,6 +447,32 @@ const handleDelete = async () => {
   }
 };
 
+const toggleBelonging = async (item) => {
+  try {
+    await axios.put(`/api/plans/${plan.value.id}/belongings/${item.id}`, {
+      is_checked: !item.is_checked
+    });
+    // Update local state
+    item.is_checked = !item.is_checked;
+    uiStore.showSuccess('チェック状態を更新しました');
+  } catch (error) {
+    console.error('Toggle belonging error:', error);
+    uiStore.showError('チェック状態の更新に失敗しました');
+  }
+};
+
+const fetchBelongings = async () => {
+  if (!plan.value?.id) return;
+  
+  try {
+    const response = await axios.get(`/api/plans/${plan.value.id}/belongings`);
+    belongings.value = response.data.data || [];
+    console.log('Belongings fetched:', belongings.value);
+  } catch (error) {
+    console.error('Failed to fetch belongings:', error);
+  }
+};
+
 const toggleChecklistItem = async (itemId) => {
   try {
     await axios.put(`/api/checklist-items/${itemId}/toggle`);
@@ -427,10 +501,12 @@ onMounted(async () => {
   // If plan is already loaded and matches the route, skip fetching
   if (plan.value && plan.value.id == planId) {
     console.log('Plan already loaded, skipping fetch');
+    await fetchBelongings();
     return;
   }
   
   // Otherwise fetch the plan
   await planStore.fetchPlan(planId);
+  await fetchBelongings();
 });
 </script>

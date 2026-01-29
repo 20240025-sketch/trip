@@ -33,7 +33,14 @@ class PlanAttachment extends Model
      */
     public function getUrl(): string
     {
-        return Storage::url($this->file_path);
+        $url = Storage::url($this->file_path);
+        
+        // If the URL already starts with /storage/, don't prepend it again
+        if (str_starts_with($this->file_path, '/storage/')) {
+            return $this->file_path;
+        }
+        
+        return $url;
     }
 
     /**

@@ -34,10 +34,19 @@
         :key="attachment.id"
         class="attachment-card"
       >
-        <div class="attachment-icon">
-          <span v-if="attachment.is_image">🖼️</span>
-          <span v-else-if="attachment.is_pdf">📄</span>
-          <span v-else>📎</span>
+        <!-- Image Thumbnail or Icon -->
+        <div class="attachment-preview">
+          <img 
+            v-if="attachment.is_image" 
+            :src="getAttachmentUrl(attachment.url)"
+            :alt="attachment.original_name"
+            class="thumbnail-image"
+            @click="viewAttachment(attachment)"
+          />
+          <div v-else class="attachment-icon">
+            <span v-if="attachment.is_pdf">📄</span>
+            <span v-else>📎</span>
+          </div>
         </div>
         <div class="attachment-info">
           <div class="attachment-name">{{ attachment.original_name }}</div>
@@ -48,7 +57,7 @@
         </div>
         <div class="attachment-actions">
           <a
-            :href="attachment.url"
+            :href="getAttachmentUrl(attachment.url)"
             target="_blank"
             class="btn-icon btn-preview"
             title="プレビュー"
@@ -118,6 +127,7 @@ const fetchAttachments = async () => {
     const response = await axios.get(`/api/plans/${props.planId}/attachments`);
     attachments.value = response.data;
     console.log('Attachments loaded:', attachments.value.length);
+    console.log('Attachments data:', attachments.value);
   } catch (error) {
     console.error('添付ファイルの取得に失敗しました:', error);
     console.error('Error response:', error.response);
@@ -233,6 +243,21 @@ const formatDate = (dateString) => {
   });
 };
 
+const getAttachmentUrl = (url) => {
+  console.log('Original URL:', url);
+  // If URL already starts with /storage/, don't prepend it again
+  if (url.startsWith('/storage/')) {
+    console.log('URL starts with /storage/, returning as-is:', url);
+    return url;
+  }
+  console.log('URL does not start with /storage/, returning:', url);
+  return url;
+};
+
+const viewAttachment = (attachment) => {
+  window.open(getAttachmentUrl(attachment.url), '_blank');
+};
+
 onMounted(() => {
   fetchAttachments();
 });
@@ -330,9 +355,32 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
+.attachment-preview {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f9ff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.thumbnail-image:hover {
+  transform: scale(1.1);
+}
+
 .attachment-icon {
   font-size: 2rem;
-  flex-shrink: 0;
 }
 
 .attachment-info {
