@@ -498,14 +498,7 @@ onMounted(async () => {
     return;
   }
   
-  // If plan is already loaded and matches the route, skip fetching
-  if (plan.value && plan.value.id == planId) {
-    console.log('Plan already loaded, skipping fetch');
-    await fetchBelongings();
-    return;
-  }
-  
-  // Otherwise fetch the plan
+  // Always fetch the plan to ensure all data (including schedules) is loaded
   await planStore.fetchPlan(planId);
   await fetchBelongings();
 });
