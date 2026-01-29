@@ -216,8 +216,8 @@
       <p class="whitespace-pre-wrap text-gray-700 text-sm sm:text-base leading-relaxed">{{ plan.memo }}</p>
     </div>
 
-    <!-- Images -->
-    <div class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-purple-100">
+    <!-- Images (Hidden) -->
+    <!-- <div class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-purple-100" style="display: none;">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
           <span>📸</span>
@@ -243,7 +243,7 @@
         <p class="text-gray-600 font-medium text-base sm:text-lg mb-2">画像がまだ追加されていません</p>
         <p class="text-gray-500 text-sm sm:text-base">編集画面から画像をアップロードできます</p>
       </div>
-    </div>
+    </div> -->
 
     <!-- Attachments -->
     <div class="mt-6 sm:mt-8 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-cyan-100">

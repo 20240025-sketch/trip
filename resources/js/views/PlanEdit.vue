@@ -26,7 +26,6 @@
         <a href="#basic-info" class="nav-item">📝 基本情報</a>
         <a href="#schedule" class="nav-item">📅 スケジュール</a>
         <a href="#belongings" class="nav-item">🎒 持ち物</a>
-        <a href="#images" class="nav-item">📸 画像</a>
         <a href="#attachments" class="nav-item">📎 添付ファイル</a>
       </div>
 
@@ -226,8 +225,8 @@
         </div>
       </section>
 
-      <!-- Images Section -->
-      <section id="images" class="content-section">
+      <!-- Images Section (Hidden) -->
+      <!-- <section id="images" class="content-section" style="display: none;">
         <div class="section-card">
           <div class="section-header">
             <div class="section-icon">📸</div>
@@ -238,7 +237,6 @@
           </div>
           
           <div class="image-content">
-            <!-- Upload Section -->
             <div class="upload-section">
               <h3 class="subsection-title">⬆️ 画像を追加</h3>
               <ImageUploader
@@ -248,7 +246,6 @@
               />
             </div>
             
-            <!-- Gallery Section -->
             <div v-if="plan.images && plan.images.length > 0" class="gallery-section">
               <h3 class="subsection-title">🖼️ アップロード済み画像 ({{ plan.images.length }}枚)</h3>
               <ImageGallery
@@ -263,7 +260,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
 
       <!-- Belongings Section -->
       <section id="belongings" class="content-section">
