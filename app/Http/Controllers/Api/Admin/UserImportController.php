@@ -205,7 +205,7 @@ class UserImportController extends Controller
             $user = User::where('email', $email)->first();
 
             if (!$user) {
-                $errors[] = "行 " . ($index + 2) . ": ユーザーが見つかりません (${email})";
+                $errors[] = "行 " . ($index + 2) . ": ユーザーが見つかりません ({$email})";
                 continue;
             }
 

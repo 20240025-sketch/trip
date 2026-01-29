@@ -10,9 +10,7 @@
       <div class="flex-1">
         <h4 class="text-lg font-bold mb-1">{{ item.title }}</h4>
         
-        <p v-if="item.description" class="text-gray-600 text-sm mb-2">
-          {{ item.description }}
-        </p>
+        <div v-if="item.description" class="text-gray-600 text-sm mb-2" v-html="linkifyDescription(item.description)"></div>
         
         <div v-if="item.location" class="text-sm text-gray-500 mb-2">
           <span class="inline-flex items-center gap-1">
@@ -69,6 +67,26 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['edit', 'delete']);
+
+const linkifyDescription = (text) => {
+  if (!text) return '';
+  
+  // URLパターンにマッチする正規表現
+  const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"'\]\s])/gi;
+  
+  // HTMLエスケープしてからリンクに変換
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+  
+  // URLをリンクに変換
+  return escaped.replace(urlPattern, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">${url}</a>`;
+  }).replace(/\n/g, '<br>');
+};
 
 const transportLabel = (type) => {
   const labels = {
