@@ -99,9 +99,7 @@
               </div>
               <div class="flex-1">
                 <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
-                <p v-if="item.description" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed">
-                  {{ item.description }}
-                </p>
+                <div v-if="item.description" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed" v-html="linkifyDescription(item.description)"></div>
                 <p v-if="item.location" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">
                   📍 {{ item.location }}
                 </p>
@@ -354,6 +352,26 @@ const getImageUrl = (image) => {
     return image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
   }
   return image.file_path ? (image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`) : '';
+};
+
+const linkifyDescription = (text) => {
+  if (!text) return '';
+  
+  // URLパターンにマッチする正規表現
+  const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"'\]\s])/gi;
+  
+  // HTMLエスケープしてからリンクに変換
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+  
+  // URLをリンクに変換
+  return escaped.replace(urlPattern, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">${url}</a>`;
+  }).replace(/\n/g, '<br>');
 };
 
 const viewImage = (image) => {
