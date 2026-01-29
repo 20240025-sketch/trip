@@ -449,7 +449,7 @@ const handleDelete = async () => {
 
 const toggleBelonging = async (item) => {
   try {
-    await axios.put(`/api/plans/${plan.value.id}/belongings/${item.id}`, {
+    await axios.put(`/api/belongings/${item.id}/toggle`, {
       is_checked: !item.is_checked
     });
     // Update local state
