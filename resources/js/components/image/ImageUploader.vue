@@ -13,7 +13,7 @@
         ref="fileInput"
         type="file"
         multiple
-        accept="image/*"
+        accept="image/*,application/pdf"
         @change="handleFileSelect"
         class="hidden"
       >
@@ -28,13 +28,13 @@
         
         <!-- Text -->
         <p class="text-lg font-bold text-blue-700 mb-2">
-          📷 画像をアップロード
+          📷 画像・ファイルをアップロード
         </p>
         <p class="text-sm text-gray-600 mb-1">
-          <strong class="text-blue-600">クリック</strong>して画像を選択、または<strong class="text-blue-600">ドラッグ&ドロップ</strong>
+          <strong class="text-blue-600">クリック</strong>してファイルを選択、または<strong class="text-blue-600">ドラッグ&ドロップ</strong>
         </p>
         <p class="text-xs text-gray-500">
-          PNG, JPG, GIF対応（1枚あたり最大10MB）
+          PNG, JPG, GIF, WebP, PDF対応（１枚あたり最大１０MB）
         </p>
         <p class="text-xs text-blue-600 mt-2 font-semibold">
           ✨ 複数枚まとめて選択できます
@@ -46,7 +46,7 @@
     <div v-if="previews.length > 0" class="space-y-3">
       <div class="flex items-center justify-between">
         <p class="text-sm font-bold text-gray-700">
-          📸 選択中の画像 ({{ previews.length }}枚)
+          � 選択中のファイル ({{ previews.length }}件)
         </p>
         <button
           type="button"
@@ -59,7 +59,23 @@
       
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div v-for="(preview, index) in previews" :key="index" class="relative group">
-          <img :src="preview.url" :alt="preview.name" class="w-full h-32 object-cover rounded-lg border-2 border-gray-200">
+          <!-- Image Preview -->
+          <img 
+            v-if="preview.type === 'image'" 
+            :src="preview.url" 
+            :alt="preview.name" 
+            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+          >
+          <!-- PDF Preview -->
+          <div 
+            v-else-if="preview.type === 'pdf'" 
+            class="w-full h-32 flex flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-red-50"
+          >
+            <svg class="w-12 h-12 text-red-600 mb-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+            </svg>
+            <span class="text-xs text-red-700 font-semibold">PDF</span>
+          </div>
           <div class="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
             <button
               type="button"
@@ -96,7 +112,7 @@
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
-        {{ previews.length }}枚の画像をアップロード
+        {{ previews.length }}件のファイルをアップロード
       </span>
     </button>
   </div>
@@ -138,8 +154,11 @@ const handleDrop = (event) => {
 
 const processFiles = (files) => {
   files.forEach(file => {
-    if (!file.type.startsWith('image/')) {
-      alert(`${file.name} は画像ファイルではありません`);
+    const isImage = file.type.startsWith('image/');
+    const isPDF = file.type === 'application/pdf';
+    
+    if (!isImage && !isPDF) {
+      alert(`${file.name} は画像またはPDFファイルではありません`);
       return;
     }
     
@@ -148,15 +167,27 @@ const processFiles = (files) => {
       return;
     }
     
-    const reader = new FileReader();
-    reader.onload = (e) => {
+    if (isPDF) {
+      // PDFの場合はプレビューなしで追加
       previews.value.push({
         file,
-        url: e.target.result,
+        url: null,
         name: file.name,
+        type: 'pdf',
       });
-    };
-    reader.readAsDataURL(file);
+    } else {
+      // 画像の場合はプレビューを生成
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previews.value.push({
+          file,
+          url: e.target.result,
+          name: file.name,
+          type: 'image',
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   });
 };
 
@@ -165,7 +196,7 @@ const removePreview = (index) => {
 };
 
 const clearAll = () => {
-  if (confirm('選択中の画像をすべてクリアしますか？')) {
+  if (confirm('選択中のファイルをすべてクリアしますか？')) {
     previews.value = [];
   }
 };
@@ -192,7 +223,7 @@ const uploadImages = async () => {
     previews.value = [];
   } catch (error) {
     console.error('Upload failed:', error);
-    alert('画像のアップロードに失敗しました: ' + (error.response?.data?.message || error.message));
+    alert('ファイルのアップロードに失敗しました: ' + (error.response?.data?.message || error.message));
   } finally {
     uploading.value = false;
   }

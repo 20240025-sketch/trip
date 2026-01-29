@@ -22,7 +22,7 @@ class UploadImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:5120', // 5MB
+            'image' => 'required|file|mimes:jpeg,png,jpg,gif,webp,pdf|max:10240', // 10MB
             'imageable_type' => 'required|string',
             'imageable_id' => 'required|integer',
             'caption' => 'nullable|string|max:500',
@@ -53,10 +53,10 @@ class UploadImageRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required' => '画像ファイルは必須です。',
-            'image.image' => 'アップロードされたファイルは画像である必要があります。',
-            'image.mimes' => '画像はJPEG、PNG形式である必要があります。',
-            'image.max' => '画像のサイズは5MB以下である必要があります。',
+            'image.required' => 'ファイルは必須です。',
+            'image.file' => 'アップロードされたファイルが不正です。',
+            'image.mimes' => 'ファイルはJPEG、PNG、GIF、WebP、PDF形式である必要があります。',
+            'image.max' => 'ファイルのサイズは10MB以下である必要があります。',
         ];
     }
 }

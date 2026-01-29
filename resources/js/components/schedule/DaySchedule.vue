@@ -62,6 +62,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import axios from 'axios';
 import ScheduleItemForm from './ScheduleItemForm.vue';
 import ScheduleItemCard from './ScheduleItemCard.vue';
 
@@ -158,7 +159,15 @@ const handleImagesUpdated = () => {
   emit('refresh');
 };
 
-const handleImageDeleted = (imageId) => {
-  emit('refresh');
+const handleImageDeleted = async (imageId) => {
+  try {
+    // Delete the image via API
+    await axios.delete(`/api/images/${imageId}`);
+    // Refresh the plan to get updated data
+    emit('refresh');
+  } catch (error) {
+    console.error('Failed to delete image:', error);
+    alert('画像の削除に失敗しました');
+  }
 };
 </script>

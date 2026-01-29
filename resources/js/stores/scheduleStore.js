@@ -44,7 +44,7 @@ export const useScheduleStore = defineStore('schedule', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.put(`/api/days/${dayId}/schedule-items/${itemId}`, data);
+        const response = await axios.put(`/api/schedule-items/${itemId}`, data);
         return response.data.data;
       } catch (error) {
         this.error = error.response?.data?.message || 'スケジュールの更新に失敗しました';
@@ -59,7 +59,7 @@ export const useScheduleStore = defineStore('schedule', {
       this.loading = true;
       this.error = null;
       try {
-        await axios.delete(`/api/days/${dayId}/schedule-items/${itemId}`);
+        await axios.delete(`/api/schedule-items/${itemId}`);
       } catch (error) {
         this.error = 'スケジュールの削除に失敗しました';
         console.error(error);

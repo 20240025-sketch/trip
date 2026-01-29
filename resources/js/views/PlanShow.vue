@@ -118,9 +118,10 @@
                 <img 
                   v-for="image in item.images" 
                   :key="image.id"
-                  :src="`/storage/${image.thumbnail_path || image.path}`" 
+                  :src="getImageUrl(image)" 
                   :alt="item.title"
                   class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-blue-100 cursor-pointer hover:opacity-80"
+                  @click="viewImage(image)"
                 >
               </div>
             </div>
@@ -341,8 +342,30 @@ const downloadPdf = async () => {
   }
 };
 
+const getImageUrl = (image) => {
+  // Use thumbnail if available, otherwise use original path
+  if (image.thumbnail_path) {
+    return image.thumbnail_path.startsWith('/storage/') ? image.thumbnail_path : `/storage/${image.thumbnail_path}`;
+  }
+  if (image.path) {
+    return image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
+  }
+  if (image.image_path) {
+    return image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
+  }
+  return image.file_path ? (image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`) : '';
+};
+
 const viewImage = (image) => {
-  const url = image.image_path ? `/storage/${image.image_path}` : `/storage/${image.file_path}`;
+  // Use original image path for viewing
+  let url = '';
+  if (image.path) {
+    url = image.path.startsWith('/storage/') ? image.path : `/storage/${image.path}`;
+  } else if (image.image_path) {
+    url = image.image_path.startsWith('/storage/') ? image.image_path : `/storage/${image.image_path}`;
+  } else if (image.file_path) {
+    url = image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`;
+  }
   window.open(url, '_blank');
 };
 

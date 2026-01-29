@@ -277,27 +277,47 @@ class PlanController extends Controller
 
         // If dates changed, update days
         if ($request->has('start_date') || $request->has('end_date')) {
-            // Delete existing days
-            $plan->days()->delete();
+            $oldStartDate = $plan->getOriginal('start_date');
+            $oldEndDate = $plan->getOriginal('end_date');
+            $newStartDate = $plan->start_date;
+            $newEndDate = $plan->end_date;
 
-            // Recreate days
-            $startDate = $plan->start_date;
-            $endDate = $plan->end_date;
-            $dayNumber = 1;
+            // Only update days if dates actually changed
+            if ($oldStartDate != $newStartDate || $oldEndDate != $newEndDate) {
+                $existingDays = $plan->days()->orderBy('day_number')->get();
+                
+                // Calculate new day count
+                $newDayCount = $newStartDate->diffInDays($newEndDate) + 1;
+                $existingDayCount = $existingDays->count();
 
-            while ($startDate <= $endDate) {
-                $plan->days()->create([
-                    'date' => $startDate,
-                    'day_number' => $dayNumber,
-                    'title' => "Day {$dayNumber}",
-                ]);
+                if ($newDayCount < $existingDayCount) {
+                    // Remove extra days from the end
+                    $plan->days()
+                        ->where('day_number', '>', $newDayCount)
+                        ->delete();
+                } elseif ($newDayCount > $existingDayCount) {
+                    // Add new days
+                    $currentDate = $newStartDate->copy()->addDays($existingDayCount);
+                    for ($dayNumber = $existingDayCount + 1; $dayNumber <= $newDayCount; $dayNumber++) {
+                        $plan->days()->create([
+                            'date' => $currentDate->copy(),
+                            'day_number' => $dayNumber,
+                            'title' => "Day {$dayNumber}",
+                        ]);
+                        $currentDate->addDay();
+                    }
+                }
 
-                $startDate = $startDate->addDay();
-                $dayNumber++;
+                // Update dates for existing days
+                $currentDate = $newStartDate->copy();
+                foreach ($existingDays->take($newDayCount) as $day) {
+                    $day->update(['date' => $currentDate->copy()]);
+                    $currentDate->addDay();
+                }
             }
         }
 
-        $plan->load('days');
+        $plan->load('days.scheduleItems.images');
 
         return response()->json([
             'data' => new PlanResource($plan),
