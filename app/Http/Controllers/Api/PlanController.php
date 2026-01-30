@@ -183,7 +183,7 @@ class PlanController extends Controller
                         });
                     }
                     // Admin sees all items
-                    $q->orderBy('time')->orderBy('order')->with('images');
+                    $q->orderBy('time')->orderBy('order')->with(['images', 'user']);
                 }]);
             },
             'participants',
@@ -269,7 +269,7 @@ class PlanController extends Controller
                             });
                         }
                         // Admin sees all items
-                        $q->orderBy('time')->orderBy('order')->with('images');
+                        $q->orderBy('time')->orderBy('order')->with(['images', 'user']);
                     }]);
                 },
                 'participants',

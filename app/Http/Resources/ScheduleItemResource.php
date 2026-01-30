@@ -34,8 +34,14 @@ class ScheduleItemResource extends JsonResource
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             
+            // User info for admin viewing
+            'user_name' => $this->whenLoaded('user', function () {
+                return $this->user?->name;
+            }),
+            
             // Flags for frontend
             'is_personal' => $this->user_id !== null,
+            'is_own' => $user && $this->user_id && $this->user_id == $user->id,
             'can_edit' => $user && (
                 $user->isAdmin() ||
                 ($this->user_id && $this->user_id == $user->id)

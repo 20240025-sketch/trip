@@ -103,7 +103,8 @@
               <div class="flex-1">
                 <div class="flex items-center gap-2">
                   <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
-                  <span v-if="item.is_personal" class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">自分用</span>
+                  <span v-if="item.is_personal && authStore.isAdmin && item.user_name" class="text-xs bg-purple-500 text-white px-2 py-1 rounded-full">👤 {{ item.user_name }}</span>
+                  <span v-else-if="item.is_own" class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">自分用</span>
                 </div>
                 <div v-if="item.description" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed" v-html="linkifyDescription(item.description)"></div>
                 <p v-if="item.location" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">
