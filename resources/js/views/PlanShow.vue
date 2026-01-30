@@ -260,6 +260,30 @@
       />
     </div>
     </div>
+
+    <!-- Image Modal -->
+    <div v-if="showImageModal" @click="closeImageModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+      <button 
+        @click="closeImageModal"
+        class="fixed top-4 right-4 text-white text-4xl font-bold hover:text-gray-300 z-[60] bg-black bg-opacity-70 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-opacity-90 transition-all"
+      >
+        ×
+      </button>
+      <div class="relative max-w-7xl max-h-full">
+        <img 
+          v-if="modalImageUrl && !isPdfUrl(modalImageUrl)"
+          :src="modalImageUrl" 
+          class="max-w-full max-h-[90vh] object-contain rounded-lg"
+          @click.stop
+        >
+        <iframe
+          v-else-if="modalImageUrl && isPdfUrl(modalImageUrl)"
+          :src="modalImageUrl"
+          class="w-full h-[90vh] rounded-lg"
+          @click.stop
+        ></iframe>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -280,6 +304,8 @@ const uiStore = useUiStore();
 
 const plan = computed(() => planStore.currentPlan);
 const belongings = ref([]);
+const showImageModal = ref(false);
+const modalImageUrl = ref('');
 
 const canEdit = computed(() => {
   if (!plan.value) return false;
@@ -439,7 +465,17 @@ const viewImage = (image) => {
   } else if (image.file_path) {
     url = image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`;
   }
-  window.open(url, '_blank');
+  modalImageUrl.value = url;
+  showImageModal.value = true;
+};
+
+const closeImageModal = () => {
+  showImageModal.value = false;
+  modalImageUrl.value = '';
+};
+
+const isPdfUrl = (url) => {
+  return url && url.toLowerCase().includes('.pdf');
 };
 
 const handleDelete = async () => {
