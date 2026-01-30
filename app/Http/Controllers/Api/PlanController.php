@@ -175,7 +175,7 @@ class PlanController extends Controller
                     if (!$user) {
                         // No user - only show original schedule items
                         $q->whereNull('user_id');
-                    } elseif (!$user->isAdmin()) {
+                    } elseif ($user && !$user->isAdmin()) {
                         // Regular user - show original items + their own items
                         $q->where(function ($subQ) use ($user) {
                             $subQ->whereNull('user_id')
@@ -261,7 +261,7 @@ class PlanController extends Controller
                         if (!$user) {
                             // No user - only show original schedule items
                             $q->whereNull('user_id');
-                        } elseif (!$user->isAdmin()) {
+                        } elseif ($user && !$user->isAdmin()) {
                             // Regular user - show original items + their own items
                             $q->where(function ($subQ) use ($user) {
                                 $subQ->whereNull('user_id')

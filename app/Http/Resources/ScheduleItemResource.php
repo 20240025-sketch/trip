@@ -43,7 +43,7 @@ class ScheduleItemResource extends JsonResource
             'is_personal' => $this->user_id !== null,
             'is_own' => $user && $this->user_id && $this->user_id == $user->id,
             'can_edit' => $user && (
-                $user->isAdmin() ||
+                $user?->isAdmin() ||
                 ($this->user_id && $this->user_id == $user->id)
             ),
         ];

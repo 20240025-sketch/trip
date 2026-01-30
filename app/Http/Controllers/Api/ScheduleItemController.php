@@ -80,7 +80,7 @@ class ScheduleItemController extends Controller
         $plan = $day->plan;
         
         $canEdit = $user && (
-            $user->isAdmin() ||
+            $user?->isAdmin() ||
             $plan->canEdit($user) ||
             ($item->user_id && $item->user_id == $user->id)
         );
@@ -144,7 +144,7 @@ class ScheduleItemController extends Controller
         $plan = $day->plan;
         
         $canDelete = $user && (
-            $user->isAdmin() ||
+            $user?->isAdmin() ||
             $plan->canEdit($user) ||
             ($item->user_id && $item->user_id == $user->id)
         );
