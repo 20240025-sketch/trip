@@ -465,8 +465,14 @@ const viewImage = (image) => {
   } else if (image.file_path) {
     url = image.file_path.startsWith('/storage/') ? image.file_path : `/storage/${image.file_path}`;
   }
-  modalImageUrl.value = url;
-  showImageModal.value = true;
+  
+  // PDF files open in new tab, images open in modal
+  if (isPdf(image)) {
+    window.open(url, '_blank');
+  } else {
+    modalImageUrl.value = url;
+    showImageModal.value = true;
+  }
 };
 
 const closeImageModal = () => {

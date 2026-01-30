@@ -393,8 +393,14 @@ const linkifyDescription = (text) => {
 
 const viewImage = (image) => {
   const url = getImageUrl(image);
-  modalImageUrl.value = url;
-  showImageModal.value = true;
+  
+  // PDF files open in new tab, images open in modal
+  if (isPdf(image)) {
+    window.open(url, '_blank');
+  } else {
+    modalImageUrl.value = url;
+    showImageModal.value = true;
+  }
 };
 
 const closeImageModal = () => {
