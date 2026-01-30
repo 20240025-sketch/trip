@@ -46,13 +46,13 @@
             </span>
           </h2>
 
-          <!-- Add Schedule Button (for authenticated users) -->
-          <div v-if="authStore.isAuthenticated && !isAddingSchedule[day.id]" class="mb-4">
+          <!-- Add Schedule Button (for admin or plan owner only) -->
+          <div v-if="(authStore.isAdmin || plan.can_edit) && !isAddingSchedule[day.id]" class="mb-4">
             <button
               @click="startAddingSchedule(day.id)"
               class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base font-semibold"
             >
-              ➕ 自分用スケジュールを追加
+              ➕ スケジュールを追加
             </button>
           </div>
 

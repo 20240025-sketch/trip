@@ -153,18 +153,7 @@ class Plan extends Model
             return true;
         }
 
-        // Regular users can edit plans from same team
-        if ($user->isRegularUser()) {
-            // Load the plan owner if not already loaded
-            if (!$this->relationLoaded('user')) {
-                $this->load('user');
-            }
-            
-            if ($this->user && $user->isSameTeam($this->user)) {
-                return true;
-            }
-        }
-
+        // Other users (including same team members) cannot edit
         return false;
     }
 

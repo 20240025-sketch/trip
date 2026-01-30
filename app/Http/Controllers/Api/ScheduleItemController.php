@@ -36,16 +36,25 @@ class ScheduleItemController extends Controller
         $user = $request->user();
         $plan = $day->plan;
         
-        // If the plan is public and user is authenticated (not the owner and not admin)
-        // Set user_id to mark it as user's personal schedule item
+        // Permission check:
+        // - Admin can add to any plan
+        // - Plan owner can add to their own plan
+        // - Other users cannot add to public plans
+        if (!$user || (!$user->isAdmin() && !$plan->canEdit($user))) {
+            return response()->json([
+                'message' => 'このプランにスケジュールを追加する権限がありません。'
+            ], 403);
+        }
+        
         $data = $request->validated();
         $data['day_id'] = $day->id;
         
-        if ($user && !$plan->canEdit($user)) {
-            // This is a personal schedule item for a public plan
+        // If admin adds to someone else's plan, mark it with admin's user_id
+        // So it will be visible to everyone
+        if ($user->isAdmin() && !$plan->canEdit($user)) {
             $data['user_id'] = $user->id;
         }
-        // Otherwise user_id remains null (original plan schedule)
+        // Otherwise user_id remains null (plan owner's schedule)
         
         $item = ScheduleItem::create($data);
 

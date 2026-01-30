@@ -81,6 +81,7 @@
               </span>
             </h2>
             <router-link 
+              v-if="canEdit"
               :to="`/plans/${plan.id}/edit`"
               class="px-4 py-2 sm:px-5 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 hover:scale-105 transition-all duration-300 font-bold text-xs sm:text-sm text-center"
             >
