@@ -13,8 +13,16 @@ class BelongingController extends Controller
     /**
      * Display a listing of the belongings for a plan.
      */
-    public function index(Plan $plan): JsonResponse
+    public function index(Request $request, Plan $plan): JsonResponse
     {
+        // Check if user can view this plan
+        $user = $request->user();
+        if (!$plan->canView($user)) {
+            return response()->json([
+                'message' => 'この旅行計画を閲覧する権限がありません。'
+            ], 403);
+        }
+
         $belongings = $plan->belongings()->orderBy('order')->get();
 
         return response()->json([

@@ -65,8 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('checklist-items/{checklistItem}/toggle', [ChecklistItemController::class, 'toggle']);
     Route::apiResource('checklist-items', ChecklistItemController::class)->except(['index', 'store']);
     
-    // Belongings (持ち物)
-    Route::get('plans/{plan}/belongings', [BelongingController::class, 'index']);
+    // Belongings (持ち物) - write operations
     Route::post('plans/{plan}/belongings', [BelongingController::class, 'store']);
     Route::put('belongings/{belonging}/toggle', [BelongingController::class, 'toggle']);
     Route::apiResource('belongings', BelongingController::class)->except(['index', 'store']);
@@ -110,6 +109,7 @@ Route::get('plans', [PlanController::class, 'index']);
 // Plans - show is public but respects auth for permissions
 Route::get('plans/{plan}', [PlanController::class, 'show']);
 Route::get('plans/{plan}/attachments', [PlanAttachmentController::class, 'index']);
+Route::get('plans/{plan}/belongings', [BelongingController::class, 'index']);
 
 // Room Assignments (部屋割) - Public access for viewing plans
 Route::get('days/{day}/room-assignments', [RoomAssignmentController::class, 'index']);
