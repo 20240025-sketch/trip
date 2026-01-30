@@ -92,13 +92,19 @@
             <div 
               v-for="item in day.schedule_items" 
               :key="item.id"
-              class="flex flex-col sm:flex-row gap-3 sm:gap-4 border-l-4 border-blue-400 pl-4 sm:pl-5 py-3"
+              :class="[
+                'flex flex-col sm:flex-row gap-3 sm:gap-4 pl-4 sm:pl-5 py-3',
+                item.is_personal ? 'border-l-4 border-green-400 bg-green-50' : 'border-l-4 border-blue-400'
+              ]"
             >
-              <div class="flex-shrink-0 sm:w-20 font-bold text-blue-600 text-base sm:text-lg">
+              <div class="flex-shrink-0 sm:w-20 font-bold text-base sm:text-lg" :class="item.is_personal ? 'text-green-600' : 'text-blue-600'">
                 {{ item.time }}
               </div>
               <div class="flex-1">
-                <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
+                  <span v-if="item.is_personal" class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">自分用</span>
+                </div>
                 <div v-if="item.description" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed" v-html="linkifyDescription(item.description)"></div>
                 <p v-if="item.location" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">
                   📍 {{ item.location }}

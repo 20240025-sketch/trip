@@ -26,7 +26,32 @@ class Day extends Model
 
     public function scheduleItems(): HasMany
     {
-        return $this->hasMany(ScheduleItem::class)->orderBy('order');
+        return $this->hasMany(ScheduleItem::class)->orderBy('time')->orderBy('order');
+    }
+
+    /**
+     * Get schedule items visible to a specific user
+     * Shows: original schedule items (user_id = null) + user's own items + all items for admins
+     */
+    public function scheduleItemsForUser($user = null): HasMany
+    {
+        $query = $this->hasMany(ScheduleItem::class);
+        
+        if (!$user) {
+            // No user - only show original schedule items
+            return $query->whereNull('user_id')->orderBy('time')->orderBy('order');
+        }
+        
+        if ($user->isAdmin()) {
+            // Admin - show all schedule items
+            return $query->orderBy('time')->orderBy('order');
+        }
+        
+        // Regular user - show original items + their own items
+        return $query->where(function ($q) use ($user) {
+            $q->whereNull('user_id')
+              ->orWhere('user_id', $user->id);
+        })->orderBy('time')->orderBy('order');
     }
 
     public function roomAssignments(): HasMany

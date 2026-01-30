@@ -165,16 +165,32 @@ class PlanController extends Controller
      */
     public function show(Request $request, string $id): JsonResponse
     {
+        // Sanctumガードを使用して認証ユーザーを取得
+        $user = Auth::guard('sanctum')->user();
+        
+        // Filter schedule items based on user permissions
         $plan = Plan::with([
-            'days.scheduleItems.images',
+            'days' => function ($query) use ($user) {
+                $query->with(['scheduleItems' => function ($q) use ($user) {
+                    if (!$user) {
+                        // No user - only show original schedule items
+                        $q->whereNull('user_id');
+                    } elseif (!$user->isAdmin()) {
+                        // Regular user - show original items + their own items
+                        $q->where(function ($subQ) use ($user) {
+                            $subQ->whereNull('user_id')
+                                 ->orWhere('user_id', $user->id);
+                        });
+                    }
+                    // Admin sees all items
+                    $q->orderBy('time')->orderBy('order')->with('images');
+                }]);
+            },
             'participants',
             'checklistItems',
             'images',
             'user'
         ])->findOrFail($id);
-
-        // Sanctumガードを使用して認証ユーザーを取得
-        $user = Auth::guard('sanctum')->user();
         
         // Log for debugging
         Log::info('Plan Show Access Attempt', [
@@ -223,16 +239,6 @@ class PlanController extends Controller
      */
     public function showBySlug(Request $request, string $slug): JsonResponse
     {
-        $plan = Plan::where('slug', $slug)
-            ->with([
-                'days.scheduleItems.images',
-                'participants',
-                'checklistItems',
-                'images',
-                'user'
-            ])
-            ->firstOrFail();
-
         // Try to authenticate if token is provided (since this route is public)
         $user = null;
         if ($token = $request->bearerToken()) {
@@ -246,6 +252,32 @@ class PlanController extends Controller
                 Log::error('Token authentication failed in showBySlug', ['error' => $e->getMessage()]);
             }
         }
+        
+        // Filter schedule items based on user permissions
+        $plan = Plan::where('slug', $slug)
+            ->with([
+                'days' => function ($query) use ($user) {
+                    $query->with(['scheduleItems' => function ($q) use ($user) {
+                        if (!$user) {
+                            // No user - only show original schedule items
+                            $q->whereNull('user_id');
+                        } elseif (!$user->isAdmin()) {
+                            // Regular user - show original items + their own items
+                            $q->where(function ($subQ) use ($user) {
+                                $subQ->whereNull('user_id')
+                                     ->orWhere('user_id', $user->id);
+                            });
+                        }
+                        // Admin sees all items
+                        $q->orderBy('time')->orderBy('order')->with('images');
+                    }]);
+                },
+                'participants',
+                'checklistItems',
+                'images',
+                'user'
+            ])
+            ->firstOrFail();
 
         // Check if user can view this plan
         if (!$plan->canView($user)) {

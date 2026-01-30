@@ -32,8 +32,20 @@ class ScheduleItemController extends Controller
     {
         $day = Day::findOrFail($dayId);
         
+        // Check if the user has permission to add schedule items
+        $user = $request->user();
+        $plan = $day->plan;
+        
+        // If the plan is public and user is authenticated (not the owner and not admin)
+        // Set user_id to mark it as user's personal schedule item
         $data = $request->validated();
         $data['day_id'] = $day->id;
+        
+        if ($user && !$plan->canEdit($user)) {
+            // This is a personal schedule item for a public plan
+            $data['user_id'] = $user->id;
+        }
+        // Otherwise user_id remains null (original plan schedule)
         
         $item = ScheduleItem::create($data);
 
@@ -61,6 +73,23 @@ class ScheduleItemController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         $item = ScheduleItem::findOrFail($id);
+        $user = $request->user();
+        
+        // Check permission: can edit if admin, plan owner, or own schedule item
+        $day = $item->day;
+        $plan = $day->plan;
+        
+        $canEdit = $user && (
+            $user->isAdmin() ||
+            $plan->canEdit($user) ||
+            ($item->user_id && $item->user_id == $user->id)
+        );
+        
+        if (!$canEdit) {
+            return response()->json([
+                'message' => 'このスケジュールを編集する権限がありません。'
+            ], 403);
+        }
 
         $validated = $request->validate([
             'time' => 'nullable|date_format:H:i',
@@ -105,9 +134,27 @@ class ScheduleItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $item = ScheduleItem::findOrFail($id);
+        $user = $request->user();
+        
+        // Check permission: can delete if admin, plan owner, or own schedule item
+        $day = $item->day;
+        $plan = $day->plan;
+        
+        $canDelete = $user && (
+            $user->isAdmin() ||
+            $plan->canEdit($user) ||
+            ($item->user_id && $item->user_id == $user->id)
+        );
+        
+        if (!$canDelete) {
+            return response()->json([
+                'message' => 'このスケジュールを削除する権限がありません。'
+            ], 403);
+        }
+        
         $item->delete();
 
         return response()->json([

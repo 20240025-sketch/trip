@@ -14,9 +14,12 @@ class ScheduleItemResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $user = $request->user();
+        
         return [
             'id' => $this->id,
             'day_id' => $this->day_id,
+            'user_id' => $this->user_id,
             'time' => $this->time?->format('H:i'),
             'title' => $this->title,
             'description' => $this->description,
@@ -30,6 +33,13 @@ class ScheduleItemResource extends JsonResource
             'images' => ImageResource::collection($this->whenLoaded('images')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            
+            // Flags for frontend
+            'is_personal' => $this->user_id !== null,
+            'can_edit' => $user && (
+                $user->isAdmin() ||
+                ($this->user_id && $this->user_id == $user->id)
+            ),
         ];
     }
 }

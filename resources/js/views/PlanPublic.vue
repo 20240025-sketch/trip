@@ -46,17 +46,90 @@
             </span>
           </h2>
 
+          <!-- Add Schedule Button (for authenticated users) -->
+          <div v-if="authStore.isAuthenticated && !isAddingSchedule[day.id]" class="mb-4">
+            <button
+              @click="startAddingSchedule(day.id)"
+              class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base font-semibold"
+            >
+              ➕ 自分用スケジュールを追加
+            </button>
+          </div>
+
+          <!-- Add Schedule Form -->
+          <div v-if="isAddingSchedule[day.id]" class="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+            <h3 class="font-bold text-lg mb-3 text-green-700">スケジュールを追加</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">時間</label>
+                <input
+                  v-model="newSchedule[day.id].time"
+                  type="time"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">タイトル *</label>
+                <input
+                  v-model="newSchedule[day.id].title"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="スケジュールのタイトル"
+                >
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">説明</label>
+                <textarea
+                  v-model="newSchedule[day.id].description"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  rows="3"
+                  placeholder="詳細な説明"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">場所</label>
+                <input
+                  v-model="newSchedule[day.id].location"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="場所"
+                >
+              </div>
+              <div class="flex gap-2">
+                <button
+                  @click="saveSchedule(day.id)"
+                  :disabled="!newSchedule[day.id].title"
+                  class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-semibold"
+                >
+                  💾 保存
+                </button>
+                <button
+                  @click="cancelAddingSchedule(day.id)"
+                  class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+                >
+                  ✕ キャンセル
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div v-if="day.schedule_items && day.schedule_items.length > 0" class="space-y-4 sm:space-y-5">
             <div 
               v-for="item in day.schedule_items" 
               :key="item.id"
-              class="flex flex-col sm:flex-row gap-3 sm:gap-4 border-l-4 border-cyan-400 pl-4 sm:pl-5 py-3"
+              :class="[
+                'flex flex-col sm:flex-row gap-3 sm:gap-4 pl-4 sm:pl-5 py-3',
+                item.is_personal ? 'border-l-4 border-green-400 bg-green-50' : 'border-l-4 border-cyan-400'
+              ]"
             >
-              <div class="flex-shrink-0 sm:w-20 font-bold text-cyan-600 text-base sm:text-lg">
+              <div class="flex-shrink-0 sm:w-20 font-bold text-base sm:text-lg" :class="item.is_personal ? 'text-green-600' : 'text-cyan-600'">
                 {{ item.time }}
               </div>
               <div class="flex-1">
-                <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-lg sm:text-xl text-gray-800">{{ item.title }}</h3>
+                  <span v-if="item.is_personal" class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">自分用</span>
+                </div>
                 <div v-if="item.description" v-html="linkifyDescription(item.description)" class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base leading-relaxed"></div>
                 <p v-if="item.location" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2">
                   📍 {{ item.location }}
@@ -160,11 +233,64 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePlanStore } from '@/stores/planStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useUiStore } from '@/stores/uiStore';
+import axios from 'axios';
 
 const route = useRoute();
 const planStore = usePlanStore();
+const authStore = useAuthStore();
+const uiStore = useUiStore();
 
 const plan = computed(() => planStore.currentPlan);
+
+const isAddingSchedule = ref({});
+const newSchedule = ref({});
+
+const startAddingSchedule = (dayId) => {
+  isAddingSchedule.value[dayId] = true;
+  newSchedule.value[dayId] = {
+    time: '',
+    title: '',
+    description: '',
+    location: ''
+  };
+};
+
+const cancelAddingSchedule = (dayId) => {
+  isAddingSchedule.value[dayId] = false;
+  newSchedule.value[dayId] = null;
+};
+
+const saveSchedule = async (dayId) => {
+  try {
+    const scheduleData = newSchedule.value[dayId];
+    
+    if (!scheduleData.title) {
+      uiStore.showError('タイトルを入力してください');
+      return;
+    }
+
+    await axios.post(`/api/days/${dayId}/schedule-items`, {
+      time: scheduleData.time || null,
+      title: scheduleData.title,
+      description: scheduleData.description || null,
+      location: scheduleData.location || null,
+      order: 999 // Will be sorted by time anyway
+    });
+
+    uiStore.showSuccess('スケジュールを追加しました');
+    
+    // Reload plan to show new schedule
+    await planStore.fetchPlanBySlug(route.params.slug);
+    
+    // Reset form
+    cancelAddingSchedule(dayId);
+  } catch (error) {
+    console.error('Failed to add schedule:', error);
+    uiStore.showError('スケジュールの追加に失敗しました');
+  }
+};
 
 const groupedChecklist = computed(() => {
   if (!plan.value?.checklist_items) return {};

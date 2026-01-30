@@ -10,6 +10,7 @@ class ScheduleItem extends Model
 {
     protected $fillable = [
         'day_id',
+        'user_id',
         'time',
         'title',
         'description',
@@ -29,6 +30,11 @@ class ScheduleItem extends Model
     public function day(): BelongsTo
     {
         return $this->belongsTo(Day::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function images(): MorphMany
