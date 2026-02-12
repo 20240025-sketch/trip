@@ -289,7 +289,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -500,8 +500,11 @@ const handleDelete = async () => {
 const toggleBelonging = async (item) => {
   try {
     const response = await axios.put(`/api/belongings/${item.id}/toggle`);
-    // Update local state with the response
-    item.user_is_checked = response.data.data.user_is_checked;
+    // Update local state by finding and updating the item in the array
+    const index = belongings.value.findIndex(b => b.id === item.id);
+    if (index !== -1) {
+      belongings.value[index].user_is_checked = response.data.data.user_is_checked;
+    }
     uiStore.showSuccess('チェック状態を更新しました');
   } catch (error) {
     console.error('Toggle belonging error:', error);
@@ -514,7 +517,8 @@ const fetchBelongings = async () => {
   
   try {
     const response = await axios.get(`/api/plans/${plan.value.id}/belongings`);
-    belongings.value = response.data.data || [];
+    // 配列全体を新しい配列として置き換えることで、Vue 3のリアクティビティを確実にする
+    belongings.value = [...(response.data.data || [])];
     console.log('Belongings fetched:', belongings.value);
   } catch (error) {
     console.error('Failed to fetch belongings:', error);
@@ -546,8 +550,21 @@ onMounted(async () => {
     return;
   }
   
+  // データをクリアしてから取得
+  belongings.value = [];
+  
   // Always fetch the plan to ensure all data (including schedules) is loaded
   await planStore.fetchPlan(planId);
   await fetchBelongings();
+});
+
+// ルートパラメータが変更されたときにデータを再取得
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    console.log('Route changed, refetching data for plan:', newId);
+    belongings.value = [];
+    await planStore.fetchPlan(newId);
+    await fetchBelongings();
+  }
 });
 </script>

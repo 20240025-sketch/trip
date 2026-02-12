@@ -7,6 +7,8 @@ use App\Models\Belonging;
 use App\Models\Plan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BelongingController extends Controller
 {
@@ -16,7 +18,16 @@ class BelongingController extends Controller
     public function index(Request $request, Plan $plan): JsonResponse
     {
         // Check if user can view this plan
-        $user = $request->user();
+        // Sanctumガードを使用して認証ユーザーを取得（認証不要ルートでも使用可能）
+        $user = Auth::guard('sanctum')->user();
+        
+        // デバッグログ
+        Log::info('BelongingController index called', [
+            'plan_id' => $plan->id,
+            'has_user' => $user !== null,
+            'user_id' => $user?->id ?? 'null',
+        ]);
+        
         if (!$plan->canView($user)) {
             return response()->json([
                 'message' => 'この旅行計画を閲覧する権限がありません。'
@@ -35,7 +46,17 @@ class BelongingController extends Controller
                     ->where('user_id', $user->id)
                     ->first();
                 
-                $belongingArray['user_is_checked'] = $userCheck ? $userCheck->pivot->is_checked : false;
+                // is_checkedをbooleanに変換
+                $isChecked = $userCheck ? (bool)$userCheck->pivot->is_checked : false;
+                $belongingArray['user_is_checked'] = $isChecked;
+                
+                // デバッグログ
+                Log::info('Belonging user check', [
+                    'belonging_id' => $belonging->id,
+                    'user_id' => $user->id,
+                    'has_user_check' => $userCheck !== null,
+                    'is_checked' => $isChecked,
+                ]);
             } else {
                 $belongingArray['user_is_checked'] = false;
             }
