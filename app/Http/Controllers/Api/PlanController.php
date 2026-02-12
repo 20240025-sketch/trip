@@ -175,14 +175,19 @@ class PlanController extends Controller
                     if (!$user) {
                         // No user - only show original schedule items
                         $q->whereNull('user_id');
-                    } elseif ($user && !$user->isAdmin()) {
-                        // Regular user - show original items + their own items
-                        $q->where(function ($subQ) use ($user) {
-                            $subQ->whereNull('user_id')
-                                 ->orWhere('user_id', $user->id);
-                        });
+                    } else {
+                        // Check if user is admin
+                        $isAdmin = $user instanceof \App\Models\User && $user->isAdmin();
+                        
+                        if (!$isAdmin) {
+                            // Regular user - show original items + their own items
+                            $q->where(function ($subQ) use ($user) {
+                                $subQ->whereNull('user_id')
+                                     ->orWhere('user_id', $user->id);
+                            });
+                        }
+                        // Admin sees all items
                     }
-                    // Admin sees all items
                     $q->orderBy('time')->orderBy('order')->with(['images', 'user']);
                 }]);
             },
