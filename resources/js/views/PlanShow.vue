@@ -199,11 +199,11 @@
             >
               <input 
                 type="checkbox" 
-                :checked="item.is_checked"
+                :checked="item.user_is_checked"
                 @change="toggleBelonging(item)"
                 class="w-5 h-5 text-cyan-600 cursor-pointer flex-shrink-0 rounded focus:ring-cyan-500"
               >
-              <span :class="{ 'line-through text-gray-400': item.is_checked, 'text-gray-700': !item.is_checked }" class="break-words font-medium">
+              <span :class="{ 'line-through text-gray-400': item.user_is_checked, 'text-gray-700': !item.user_is_checked }" class="break-words font-medium">
                 {{ item.name }}
               </span>
             </label>
@@ -499,11 +499,9 @@ const handleDelete = async () => {
 
 const toggleBelonging = async (item) => {
   try {
-    await axios.put(`/api/belongings/${item.id}/toggle`, {
-      is_checked: !item.is_checked
-    });
-    // Update local state
-    item.is_checked = !item.is_checked;
+    const response = await axios.put(`/api/belongings/${item.id}/toggle`);
+    // Update local state with the response
+    item.user_is_checked = response.data.data.user_is_checked;
     uiStore.showSuccess('チェック状態を更新しました');
   } catch (error) {
     console.error('Toggle belonging error:', error);

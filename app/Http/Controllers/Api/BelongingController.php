@@ -25,8 +25,26 @@ class BelongingController extends Controller
 
         $belongings = $plan->belongings()->orderBy('order')->get();
 
+        // 各持ち物に対して、現在のユーザーのチェック状態を追加
+        $belongingsWithUserCheck = $belongings->map(function ($belonging) use ($user) {
+            $belongingArray = $belonging->toArray();
+            
+            // ログインしている場合のみ、そのユーザーのチェック状態を追加
+            if ($user) {
+                $userCheck = $belonging->users()
+                    ->where('user_id', $user->id)
+                    ->first();
+                
+                $belongingArray['user_is_checked'] = $userCheck ? $userCheck->pivot->is_checked : false;
+            } else {
+                $belongingArray['user_is_checked'] = false;
+            }
+            
+            return $belongingArray;
+        });
+
         return response()->json([
-            'data' => $belongings
+            'data' => $belongingsWithUserCheck
         ]);
     }
 
@@ -75,14 +93,36 @@ class BelongingController extends Controller
     /**
      * Toggle the checked status of a belonging.
      */
-    public function toggle(Belonging $belonging): JsonResponse
+    public function toggle(Request $request, Belonging $belonging): JsonResponse
     {
-        $belonging->update([
-            'is_checked' => !$belonging->is_checked
-        ]);
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json([
+                'message' => 'ログインが必要です。'
+            ], 401);
+        }
+
+        // 現在のユーザーのチェック状態を取得または作成
+        $userCheck = $belonging->users()->where('user_id', $user->id)->first();
+        
+        if ($userCheck) {
+            // 既存のチェック状態をトグル
+            $belonging->users()->updateExistingPivot($user->id, [
+                'is_checked' => !$userCheck->pivot->is_checked
+            ]);
+            $isChecked = !$userCheck->pivot->is_checked;
+        } else {
+            // 新しいチェック状態を作成（デフォルトでチェック済み）
+            $belonging->users()->attach($user->id, ['is_checked' => true]);
+            $isChecked = true;
+        }
 
         return response()->json([
-            'data' => $belonging,
+            'data' => [
+                'id' => $belonging->id,
+                'user_is_checked' => $isChecked,
+            ],
             'message' => 'チェック状態を更新しました。'
         ]);
     }
